@@ -6,16 +6,37 @@ using MudBlazor.Services;
 using Blazored.LocalStorage;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+// Configure root components
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+// Configure HttpClient for static hosting
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress),
+    Timeout = TimeSpan.FromSeconds(30)
+});
 
-// Add MudBlazor services
-builder.Services.AddMudServices();
+// Add MudBlazor services with optimized configuration
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomLeft;
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.NewestOnTop = false;
+    config.SnackbarConfiguration.ShowCloseIcon = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 10000;
+    config.SnackbarConfiguration.HideTransitionDuration = 500;
+    config.SnackbarConfiguration.ShowTransitionDuration = 500;
+    config.SnackbarConfiguration.SnackbarVariant = MudBlazor.Variant.Filled;
+});
 
-// Add LocalStorage services
-builder.Services.AddBlazoredLocalStorage();
+// Add LocalStorage services with optimized configuration
+builder.Services.AddBlazoredLocalStorage(config =>
+{
+    config.JsonSerializerOptions.WriteIndented = false;
+    config.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
 
 // Add custom services
 builder.Services.AddScoped<IUIPersonalizationService, UIPersonalizationService>();
@@ -32,4 +53,11 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ITimeTrackingService, TimeTrackingService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
-await builder.Build().RunAsync();
+// Build and configure the application
+var app = builder.Build();
+
+// Log application start for static hosting
+Console.WriteLine("BlazorControlPanel starting...");
+
+// Run the application
+await app.RunAsync();

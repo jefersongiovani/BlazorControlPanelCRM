@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  blazor-control-panel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blazor-control-panel
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.blazor-control-panel.rule=Host(`localhost`)"
+      - "traefik.http.routers.blazor-control-panel.entrypoints=web"
+      - "traefik.http.services.blazor-control-panel.loadbalancer.server.port=80"
+
+networks:
+  default:
+    name: blazor-control-panel-network

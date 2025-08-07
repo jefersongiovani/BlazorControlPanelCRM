@@ -21,6 +21,10 @@ A comprehensive, enterprise-grade Customer Relationship Management (CRM) system 
 - **Comprehensive Reporting** - Multi-format export capabilities
 - **Extensible Architecture** - Ready for future enhancements
 
+### 📝 **TODO**
+- Finish encapsulating the MudBlazor components in their own files;
+- Update Code Documentation.
+
 ## 📁 Project Structure
 
 ```
@@ -198,18 +202,74 @@ BlazorControlPanel/
 - .NET 9 SDK
 - Visual Studio 2022 or VS Code
 - Git
+- Docker (for containerized deployment)
 
-### **Installation**
+### **Local Development**
 1. Clone the repository
 2. Navigate to the project directory
 3. Restore NuGet packages: `dotnet restore`
 4. Build the project: `dotnet build`
 5. Run the application: `dotnet run`
 
-### **Development**
+### **Development Environment**
 - The application runs on `https://localhost:5001`
 - Hot reload is enabled for development
 - All services are currently mock implementations
+
+## 🐳 Docker Deployment
+
+### **Quick Start with Docker**
+The application includes a complete Docker setup for production deployment with nginx as a static file server.
+
+#### **Option 1: Automated Build Script (Recommended)**
+```bash
+# Make the script executable
+chmod +x build-docker.sh
+
+# Build and optionally run the container
+./build-docker.sh
+```
+
+#### **Option 2: Manual Docker Commands**
+```bash
+# Build the Docker image
+docker build -t blazor-control-panel:latest .
+
+# Run the container
+docker run -d \
+  --name blazor-control-panel \
+  -p 8080:80 \
+  --restart unless-stopped \
+  blazor-control-panel:latest
+```
+
+#### **Option 3: Docker Compose**
+```bash
+# Start the application
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the application
+docker-compose down
+```
+
+### **Access Points**
+- **Main Application**: http://localhost:8080
+- **Health Check**: http://localhost:8080/health
+
+### **Docker Architecture**
+- **Multi-Stage Build**: .NET 9 SDK for building, nginx:alpine for serving
+- **Optimized nginx**: Gzip compression, caching, security headers
+- **Production Ready**: Health checks, logging, proper permissions
+- **Lightweight**: Alpine Linux base for minimal attack surface
+
+### **Production Deployment Features**
+- **Performance**: Optimized caching and compression strategies
+- **Security**: Security headers and minimal container footprint
+- **Monitoring**: Built-in health checks and comprehensive logging
+- **Scalability**: Ready for load balancers and orchestration platforms
 
 ## 📈 Current Status
 
