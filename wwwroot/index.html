@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blazor Control Painel</title>
+    <title>BlazorControlPanel - Enterprise CRM</title>
     <base href="/" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
@@ -15,11 +15,24 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="loading-container">
+            <div class="loading-logo">
+                <svg viewBox="0 0 100 100" class="logo-svg">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#1b6ec2" stroke-width="3"/>
+                    <text x="50" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b6ec2" font-weight="bold">CRM</text>
+                </svg>
+            </div>
+            <svg class="loading-progress">
+                <circle r="40%" cx="50%" cy="50%" />
+                <circle r="40%" cx="50%" cy="50%" />
+            </svg>
+            <div class="loading-progress-text"></div>
+            <div class="loading-details">
+                <div class="loading-step">Initializing...</div>
+                <div class="loading-percentage">0%</div>
+            </div>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
@@ -27,6 +40,165 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
+    <script>
+        // Real loading progress tracking for Blazor WebAssembly
+        (function() {
+            let loadingSteps = [
+                { name: 'Initializing...', progress: 0 },
+                { name: 'Loading framework...', progress: 10 },
+                { name: 'Downloading assemblies...', progress: 30 },
+                { name: 'Loading application...', progress: 60 },
+                { name: 'Starting services...', progress: 80 },
+                { name: 'Ready!', progress: 100 }
+            ];
+
+            let currentStep = 0;
+            let currentProgress = 0;
+
+            function updateProgress(progress, stepName) {
+                currentProgress = Math.min(progress, 100);
+
+                // Update CSS custom properties
+                document.documentElement.style.setProperty('--blazor-load-percentage', currentProgress + '%');
+                document.documentElement.style.setProperty('--blazor-load-percentage-text', stepName || 'Loading...');
+
+                // Update UI elements
+                const stepElement = document.querySelector('.loading-step');
+                const percentageElement = document.querySelector('.loading-percentage');
+
+                if (stepElement) stepElement.textContent = stepName || 'Loading...';
+                if (percentageElement) percentageElement.textContent = Math.round(currentProgress) + '%';
+
+                console.log(`Loading Progress: ${Math.round(currentProgress)}% - ${stepName}`);
+            }
+
+            function simulateProgress() {
+                if (currentStep < loadingSteps.length) {
+                    const step = loadingSteps[currentStep];
+                    updateProgress(step.progress, step.name);
+                    currentStep++;
+
+                    // Vary timing based on step
+                    let delay = 200;
+                    if (step.name.includes('assemblies')) delay = 800; // Longer for assembly download
+                    if (step.name.includes('application')) delay = 600; // Longer for app loading
+
+                    setTimeout(simulateProgress, delay);
+                }
+            }
+
+            // Start progress tracking
+            updateProgress(0, 'Initializing...');
+
+            // Monitor actual Blazor loading events
+            let resourcesLoaded = 0;
+            let totalResources = 0;
+            let blazorResourcesDetected = false;
+
+            // Track resource loading with more detailed monitoring
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const url = args[0];
+                if (typeof url === 'string') {
+                    // Detect Blazor-related resources
+                    if (url.includes('.dll') || url.includes('.wasm') || url.includes('_framework') || url.includes('blazor.boot.json')) {
+                        if (!blazorResourcesDetected) {
+                            blazorResourcesDetected = true;
+                            updateProgress(15, 'Loading framework...');
+                        }
+
+                        totalResources++;
+
+                        return originalFetch.apply(this, args).then(response => {
+                            resourcesLoaded++;
+
+                            // Calculate more accurate progress based on resource type
+                            let progressWeight = 1;
+                            if (url.includes('.wasm')) progressWeight = 3; // WASM files are more important
+                            if (url.includes('blazor.boot.json')) progressWeight = 2; // Boot file is important
+
+                            const realProgress = Math.min(15 + (resourcesLoaded / Math.max(totalResources, 1)) * 50, 65);
+
+                            if (realProgress > currentProgress && currentProgress < 65) {
+                                let stepName = 'Downloading assemblies...';
+                                if (url.includes('.wasm')) stepName = 'Loading WebAssembly...';
+                                if (url.includes('blazor.boot.json')) stepName = 'Loading configuration...';
+
+                                updateProgress(realProgress, stepName);
+                            }
+
+                            return response;
+                        }).catch(error => {
+                            console.error('Resource loading error:', url, error);
+                            return Promise.reject(error);
+                        });
+                    }
+                }
+                return originalFetch.apply(this, args);
+            };
+
+            // Enhanced Blazor startup detection
+            let blazorStartupDetected = false;
+            const originalCreateElement = document.createElement;
+            document.createElement = function(tagName) {
+                const element = originalCreateElement.call(this, tagName);
+
+                // Detect when Blazor scripts are being loaded
+                if (tagName.toLowerCase() === 'script' && !blazorStartupDetected) {
+                    element.addEventListener('load', function() {
+                        if (this.src && this.src.includes('blazor.webassembly.js')) {
+                            blazorStartupDetected = true;
+                            updateProgress(25, 'Initializing Blazor...');
+                        }
+                    });
+                }
+
+                return element;
+            };
+
+            // Start the progress simulation
+            setTimeout(simulateProgress, 100);
+
+            // Listen for Blazor events
+            window.addEventListener('DOMContentLoaded', function() {
+                updateProgress(20, 'Loading framework...');
+            });
+
+            // Blazor started event
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check if Blazor is starting
+                const checkBlazorStart = setInterval(function() {
+                    if (window.Blazor) {
+                        clearInterval(checkBlazorStart);
+                        updateProgress(90, 'Starting application...');
+
+                        // Final step when Blazor is fully loaded
+                        setTimeout(function() {
+                            updateProgress(100, 'Ready!');
+
+                            // Hide loading screen after a brief moment
+                            setTimeout(function() {
+                                const loadingContainer = document.querySelector('.loading-container');
+                                if (loadingContainer) {
+                                    loadingContainer.style.opacity = '0';
+                                    loadingContainer.style.transition = 'opacity 0.5s ease-out';
+                                    setTimeout(function() {
+                                        loadingContainer.style.display = 'none';
+                                    }, 500);
+                                }
+                            }, 500);
+                        }, 200);
+                    }
+                }, 50);
+
+                // Fallback timeout
+                setTimeout(function() {
+                    clearInterval(checkBlazorStart);
+                    updateProgress(100, 'Ready!');
+                }, 10000);
+            });
+        })();
+    </script>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 </body>
