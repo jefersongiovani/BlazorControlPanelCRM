@@ -290,12 +290,10 @@ The application includes comprehensive settings management:
 
 ## 📝 License
 
-This project is proprietary software developed for business management purposes.
+This project is an open source software developed for business management purposes. The intent is to provide a relatively complete template for building a control panel.
 
 ## 🤝 Contributing
 
-This is a private project. For questions or support, please contact the development team.
+This is a open source project. For questions or support, please contact the development team.
 
 ---
-
-**Control Painel CRM** - Empowering businesses with intelligent customer relationship management.
