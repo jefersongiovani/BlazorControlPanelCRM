@@ -1,0 +1,255 @@
+@page "/contracts"
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Contracts - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Contract Management</MudText>
+
+<MudStack Spacing="3">
+    <!-- Quick Actions -->
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h6">Contract Overview</MudText>
+                <MudStack Row="true" Spacing="2">
+                    <BaseButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => Snackbar.Add("Create Contract feature coming soon", Severity.Info))">
+                        New Contract
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Outlined" 
+                               Color="Color.Secondary" 
+                               StartIcon="@Icons.Material.Filled.Upload"
+                               OnClick="@(() => Snackbar.Add("Import Contracts feature coming soon", Severity.Info))">
+                        Import
+                    </BaseButton>
+                </MudStack>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Contract Summary Cards -->
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Active Contracts</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success">24</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Success">↑ 3 new this month</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.Assignment" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Expiring Soon</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning">5</MudText>
+                            <MudText Typo="Typo.caption">Next 30 days</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Warning" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Total Value</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">$485,000</MudText>
+                            <MudText Typo="Typo.caption">Active contracts</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Primary" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Pending Review</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error">3</MudText>
+                            <MudText Typo="Typo.caption">Require attention</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.PendingActions" Color="Color.Error" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Contract Types -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Contract Types</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                @foreach (var contractType in _contractTypes)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Outlined="true">
+                            <MudCardContent>
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <div>
+                                        <MudText Typo="Typo.subtitle1" Style="font-weight: 500;">@contractType.Name</MudText>
+                                        <MudText Typo="Typo.h6" Color="Color.Primary">@contractType.Count</MudText>
+                                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@contractType.TotalValue.ToString("C")</MudText>
+                                    </div>
+                                    <MudIcon Icon="@contractType.Icon" Color="Color.Primary" Size="Size.Large" />
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Recent Contracts -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Recent Contracts</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTable T="ContractSummary" 
+                      Items="@_recentContracts" 
+                      Dense="true"
+                      Hover="true"
+                      Striped="true">
+                <HeaderContent>
+                    <MudTh>Contract</MudTh>
+                    <MudTh>Client</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Value</MudTh>
+                    <MudTh>Start Date</MudTh>
+                    <MudTh>End Date</MudTh>
+                    <MudTh>Status</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Contract">
+                        <MudText Typo="Typo.body1" Style="font-weight: 500;">@context.Name</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Client">
+                        <MudText Typo="Typo.body2">@context.ClientName</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Type">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info">@context.Type</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Value">
+                        <MudText Typo="Typo.body2">@context.Value.ToString("C")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Start Date">
+                        <MudText Typo="Typo.body2">@context.StartDate.ToString("MMM dd, yyyy")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="End Date">
+                        <MudText Typo="Typo.body2">@context.EndDate.ToString("MMM dd, yyyy")</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" 
+                                Size="Size.Small" 
+                                Color="@GetStatusColor(context.Status)">
+                            @context.Status
+                        </MudChip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Coming Soon Notice -->
+    <MudAlert Severity="Severity.Info" Dense="false">
+        <MudText Typo="Typo.body1" Style="font-weight: 500;">Contract Management Module</MudText>
+        <MudText Typo="Typo.body2">
+            The complete contract management system is under development and will include:
+        </MudText>
+        <ul style="margin-top: 8px;">
+            <li>Contract creation and templates</li>
+            <li>Digital signature integration</li>
+            <li>Renewal and expiration tracking</li>
+            <li>Contract analytics and reporting</li>
+            <li>Document version control</li>
+            <li>Automated notifications and alerts</li>
+        </ul>
+    </MudAlert>
+</MudStack>
+
+@code {
+    private List<ContractType> _contractTypes = new();
+    private List<ContractSummary> _recentContracts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Contracts Page Viewed");
+        LoadContractData();
+    }
+
+    private void LoadContractData()
+    {
+        _contractTypes = new List<ContractType>
+        {
+            new() { Name = "Service Agreement", Count = 12, TotalValue = 185000, Icon = Icons.Material.Filled.Handshake },
+            new() { Name = "Software License", Count = 8, TotalValue = 95000, Icon = Icons.Material.Filled.Computer },
+            new() { Name = "Maintenance", Count = 6, TotalValue = 75000, Icon = Icons.Material.Filled.Build },
+            new() { Name = "Consulting", Count = 4, TotalValue = 130000, Icon = Icons.Material.Filled.Psychology }
+        };
+
+        _recentContracts = new List<ContractSummary>
+        {
+            new() { Name = "Enterprise Software License", ClientName = "TechCorp Inc.", Type = "Software", Value = 25000, StartDate = DateTime.Now.AddDays(-30), EndDate = DateTime.Now.AddYears(1), Status = "Active" },
+            new() { Name = "Consulting Services", ClientName = "StartupXYZ", Type = "Consulting", Value = 15000, StartDate = DateTime.Now.AddDays(-15), EndDate = DateTime.Now.AddMonths(6), Status = "Active" },
+            new() { Name = "Maintenance Agreement", ClientName = "BigCorp Ltd.", Type = "Maintenance", Value = 8000, StartDate = DateTime.Now.AddDays(-60), EndDate = DateTime.Now.AddDays(30), Status = "Expiring" },
+            new() { Name = "Service Level Agreement", ClientName = "MediumBiz", Type = "Service", Value = 12000, StartDate = DateTime.Now.AddDays(-5), EndDate = DateTime.Now.AddMonths(12), Status = "Pending" }
+        };
+    }
+
+    private Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Active" => Color.Success,
+            "Pending" => Color.Warning,
+            "Expiring" => Color.Error,
+            "Expired" => Color.Dark,
+            _ => Color.Default
+        };
+    }
+
+    public class ContractType
+    {
+        public string Name { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public decimal TotalValue { get; set; }
+        public string Icon { get; set; } = string.Empty;
+    }
+
+    public class ContractSummary
+    {
+        public string Name { get; set; } = string.Empty;
+        public string ClientName { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public decimal Value { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+}

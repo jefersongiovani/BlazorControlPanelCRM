@@ -1,0 +1,222 @@
+@namespace BlazorControlPanel.Components.Customers
+@inject ICustomerService CustomerService
+@inject ISnackbar Snackbar
+
+<MudForm @ref="_form" @bind-IsValid="@_isValid" Model="@Customer">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Personal Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Customer.FirstName" 
+                                             Label="First Name" 
+                                             Required="true"
+                                             RequiredError="First name is required"
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Customer.LastName" 
+                                             Label="Last Name" 
+                                             Required="true"
+                                             RequiredError="Last name is required"
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseTextField @bind-Value="Customer.Email" 
+                                     Label="Email" 
+                                     Required="true"
+                                     RequiredError="Email is required"
+                                     InputType="InputType.Email"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Customer.Phone" 
+                                     Label="Phone" 
+                                     InputType="InputType.Telephone"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Customer.Company" 
+                                     Label="Company" 
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Customer.JobTitle" 
+                                     Label="Job Title" 
+                                     T="string" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Address Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <BaseTextField @bind-Value="Customer.Address.Street" 
+                                     Label="Street Address" 
+                                     T="string" />
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Customer.Address.City" 
+                                             Label="City" 
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Customer.Address.State" 
+                                             Label="State/Province" 
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Customer.Address.PostalCode" 
+                                             Label="Postal Code" 
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Customer.Address.Country" 
+                                             Label="Country" 
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Customer Details</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Customer.Status" 
+                                          Label="Status" 
+                                          Required="true"
+                                          T="CustomerStatus">
+                                    @foreach (CustomerStatus status in Enum.GetValues<CustomerStatus>())
+                                    {
+                                        <MudSelectItem T="CustomerStatus" Value="@status">@status.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Customer.Type" 
+                                          Label="Type" 
+                                          Required="true"
+                                          T="CustomerType">
+                                    @foreach (CustomerType type in Enum.GetValues<CustomerType>())
+                                    {
+                                        <MudSelectItem T="CustomerType" Value="@type">@type.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseTextField @bind-Value="Customer.Notes" 
+                                     Label="Notes" 
+                                     Lines="4"
+                                     T="string" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+    </MudGrid>
+</MudForm>
+
+<MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+    <BaseButton Variant="Variant.Text" 
+               OnClick="@HandleCancel">
+        Cancel
+    </BaseButton>
+    <BaseButton Variant="Variant.Filled" 
+               Color="Color.Primary" 
+               Disabled="@(!_isValid || _saving)"
+               OnClick="@HandleSave">
+        @if (_saving)
+        {
+            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+            <MudText Class="ms-2">Saving...</MudText>
+        }
+        else
+        {
+            <MudText>@(IsEditMode ? "Update" : "Create") Customer</MudText>
+        }
+    </BaseButton>
+</MudStack>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+    private bool _saving;
+
+    [Parameter] public Customer Customer { get; set; } = new();
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Customer> OnSave { get; set; }
+
+    private async Task HandleSave()
+    {
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (_isValid)
+            {
+                _saving = true;
+                try
+                {
+                    Customer savedCustomer;
+                    if (IsEditMode)
+                    {
+                        savedCustomer = await CustomerService.UpdateCustomerAsync(Customer);
+                        Snackbar.Add($"Customer '{savedCustomer.DisplayName}' updated successfully", Severity.Success);
+                    }
+                    else
+                    {
+                        savedCustomer = await CustomerService.CreateCustomerAsync(Customer);
+                        Snackbar.Add($"Customer '{savedCustomer.DisplayName}' created successfully", Severity.Success);
+                    }
+                    
+                    await OnSave.InvokeAsync(savedCustomer);
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error saving customer: {ex.Message}", Severity.Error);
+                }
+                finally
+                {
+                    _saving = false;
+                }
+            }
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

@@ -1,0 +1,44 @@
+@page "/staff/create"
+@inject NavigationManager Navigation
+@inject IUIPersonalizationService UIPersonalizationService
+
+<PageTitle>Create Staff Member - Control Painel CRM</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbItems" />
+
+<MudText Typo="Typo.h3" GutterBottom="true">Create New Staff Member</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <StaffForm Staff="@_staff" 
+               IsEditMode="false"
+               OnSave="@OnStaffSaved"
+               OnCancel="@OnCancel" />
+</MudPaper>
+
+@code {
+    private Staff _staff = new();
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Create Staff Page Viewed");
+        
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: "/", icon: Icons.Material.Filled.Home),
+            new BreadcrumbItem("Staff", href: "/staff", icon: Icons.Material.Filled.Badge),
+            new BreadcrumbItem("Create Staff", href: null, disabled: true, icon: Icons.Material.Filled.Add)
+        };
+    }
+
+    private async Task OnStaffSaved(Staff staff)
+    {
+        await UIPersonalizationService.LogAccessAsync("Staff Created", staff.FullName);
+        Navigation.NavigateTo("/staff");
+    }
+
+    private void OnCancel()
+    {
+        Navigation.NavigateTo("/staff");
+    }
+}

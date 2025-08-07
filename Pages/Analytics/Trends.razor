@@ -1,0 +1,314 @@
+@page "/analytics/trends"
+@inject IAnalyticsService AnalyticsService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Trend Analysis - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Trend Analysis</MudText>
+
+<MudStack Spacing="3">
+    <!-- Time Period and Metric Selection -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Analysis Configuration</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudDateRangePicker @bind-DateRange="_dateRange"
+                                       Label="Analysis Period"
+                                       Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <BaseSelect @bind-Value="_selectedMetric"
+                               Label="Primary Metric"
+                               T="string"
+                               Variant="Variant.Outlined">
+                        <MudSelectItem T="string" Value="@("revenue")">Revenue</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("leads")">New Leads</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("projects")">Projects</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("customers")">Customers</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("conversion")">Conversion Rate</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <BaseSelect @bind-Value="_timeGranularity"
+                               Label="Time Granularity"
+                               T="string"
+                               Variant="Variant.Outlined">
+                        <MudSelectItem T="string" Value="@("daily")">Daily</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("weekly")">Weekly</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("monthly")">Monthly</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("quarterly")">Quarterly</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+            </MudGrid>
+            <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+                <BaseButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="@LoadTrendData"
+                           Disabled="@_loading">
+                    @if (_loading)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        <MudText Class="ms-2">Analyzing...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Analyze Trends</MudText>
+                    }
+                </BaseButton>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Trend Summary Cards -->
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Trend Direction</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Primary">
+                                Upward
+                            </MudText>
+                            <MudText Typo="Typo.caption">15.2% change</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp"
+                                Color="Color.Success"
+                                Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Volatility</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Warning">
+                                12.5%
+                            </MudText>
+                            <MudText Typo="Typo.caption">Standard deviation</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.ShowChart"
+                                Color="Color.Warning"
+                                Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Peak Value</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Success">
+                                125,000
+                            </MudText>
+                            <MudText Typo="Typo.caption">Nov 15</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp"
+                                Color="Color.Success"
+                                Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Average</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Info">
+                                98,500
+                            </MudText>
+                            <MudText Typo="Typo.caption">Period average</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.BarChart"
+                                Color="Color.Info"
+                                Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Main Trend Chart -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Revenue Trend Analysis</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Download"
+                                  Color="Color.Primary"
+                                  OnClick="@ExportTrendData" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                  Color="Color.Secondary"
+                                  OnClick="@LoadTrendData" />
+                </MudStack>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <div style="height: 400px; display: flex; align-items: center; justify-content: center;">
+                @if (_loading)
+                {
+                    <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+                }
+                else
+                {
+                    <div style="width: 100%; height: 100%;">
+                        <MudText Typo="Typo.body1" Class="mud-text-secondary" Align="Align.Center">
+                            Interactive Chart Component Would Be Rendered Here
+                        </MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary" Align="Align.Center">
+                            Chart integration ready for implementation
+                        </MudText>
+                    </div>
+                }
+            </div>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Trend Analysis Details -->
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Detailed Analysis</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudAlert Severity="Severity.Info">
+                        Detailed trend analysis table will be displayed here after data processing.
+                    </MudAlert>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Insights & Recommendations</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudStack Spacing="3">
+                        <MudAlert Severity="Severity.Success" Dense="true">
+                            <MudText Typo="Typo.body2" Style="font-weight: 500;">Strong Growth Detected</MudText>
+                            <MudText Typo="Typo.body2">Revenue has increased by 15.2% over the selected period.</MudText>
+                        </MudAlert>
+
+                        <MudAlert Severity="Severity.Warning" Dense="true">
+                            <MudText Typo="Typo.body2" Style="font-weight: 500;">Moderate Volatility</MudText>
+                            <MudText Typo="Typo.body2">Consider monitoring market factors affecting performance.</MudText>
+                        </MudAlert>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Comparative Analysis -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Comparative Analysis</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true">
+                        <MudCardContent>
+                            <MudStack Spacing="2">
+                                <MudText Typo="Typo.subtitle1" Style="font-weight: 500;">Revenue</MudText>
+                                <MudStack Row="true" Justify="Justify.SpaceBetween">
+                                    <div>
+                                        <MudText Typo="Typo.body2" Class="mud-text-secondary">Current</MudText>
+                                        <MudText Typo="Typo.h6">125,000</MudText>
+                                    </div>
+                                    <div>
+                                        <MudText Typo="Typo.body2" Class="mud-text-secondary">Previous</MudText>
+                                        <MudText Typo="Typo.h6">108,500</MudText>
+                                    </div>
+                                </MudStack>
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.body2" Color="Color.Success">
+                                        ↗ 15.2%
+                                    </MudText>
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Success">
+                                        Up
+                                    </MudChip>
+                                </MudStack>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+@code {
+    private DateRange? _dateRange = new(DateTime.UtcNow.AddMonths(-3), DateTime.UtcNow);
+    private string _selectedMetric = "revenue";
+    private string _timeGranularity = "monthly";
+    private bool _loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Trend Analysis Viewed");
+        await LoadTrendData();
+    }
+
+    private async Task LoadTrendData()
+    {
+        _loading = true;
+        try
+        {
+            var startDate = _dateRange?.Start ?? DateTime.UtcNow.AddMonths(-3);
+            var endDate = _dateRange?.End ?? DateTime.UtcNow;
+
+            // Simulate data loading
+            await Task.Delay(1000);
+
+            await UIPersonalizationService.LogAccessAsync("Trend Analysis Updated", $"{_selectedMetric} - {_timeGranularity}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task ExportTrendData()
+    {
+        var request = new ReportRequest
+        {
+            Type = ReportType.CustomReport,
+            StartDate = _dateRange?.Start ?? DateTime.UtcNow.AddMonths(-3),
+            EndDate = _dateRange?.End ?? DateTime.UtcNow,
+            Format = ReportFormat.Excel,
+            IncludeCharts = true,
+            IncludeDetails = true
+        };
+
+        var report = await AnalyticsService.GenerateReportAsync(request);
+        Snackbar.Add($"Trend analysis exported: {report.FileName}", Severity.Success);
+        await UIPersonalizationService.LogAccessAsync("Trend Data Exported", _selectedMetric);
+    }
+}

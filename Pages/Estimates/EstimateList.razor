@@ -1,0 +1,308 @@
+@page "/estimates"
+@inject IEstimateService EstimateService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Estimates - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Estimates</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField @bind-Value="_searchString" 
+                     Placeholder="Search estimates..." 
+                     Adornment="Adornment.Start" 
+                     AdornmentIcon="@Icons.Material.Filled.Search"
+                     IconSize="Size.Medium"
+                     Class="mt-0"
+                     Immediate="true"
+                     DebounceInterval="300"
+                     OnDebounceIntervalElapsed="@OnSearch" />
+        
+        <MudStack Row="true" Spacing="2">
+            <BaseSelect @bind-Value="_selectedStatus" 
+                       Label="Status Filter" 
+                       Clearable="true"
+                       T="EstimateStatus?"
+                       Class="min-width-150">
+                <MudSelectItem T="EstimateStatus?" Value="@((EstimateStatus?)null)">All Statuses</MudSelectItem>
+                @foreach (EstimateStatus status in Enum.GetValues<EstimateStatus>())
+                {
+                    <MudSelectItem T="EstimateStatus?" Value="@status">@status.ToString()</MudSelectItem>
+                }
+            </BaseSelect>
+            
+            <BaseButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@CreateEstimate">
+                Create Estimate
+            </BaseButton>
+        </MudStack>
+    </MudStack>
+
+    <MudTable T="Estimate" 
+              Items="@_filteredEstimates" 
+              Loading="@_loading"
+              Dense="false"
+              Hover="true"
+              Striped="true"
+              Bordered="true"
+              FixedHeader="true"
+              Height="600px">
+        
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Estimate List</MudText>
+            <MudSpacer />
+            <MudText Typo="Typo.body2">@_filteredEstimates.Count() estimates found</MudText>
+        </ToolBarContent>
+        
+        <HeaderContent>
+            <MudTh>Estimate #</MudTh>
+            <MudTh>Customer</MudTh>
+            <MudTh>Title</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Created Date</MudTh>
+            <MudTh>Expiry Date</MudTh>
+            <MudTh>Total</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        
+        <RowTemplate>
+            <MudTd DataLabel="Estimate #">
+                <MudText Typo="Typo.body1">@context.DisplayNumber</MudText>
+            </MudTd>
+            <MudTd DataLabel="Customer">
+                <div>
+                    <MudText Typo="Typo.body1">@(context.Customer?.DisplayName ?? "Unknown Customer")</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@(context.Customer?.Email ?? "")</MudText>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Title">
+                <MudText Typo="Typo.body1">@context.Title</MudText>
+                @if (!string.IsNullOrEmpty(context.Description))
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.Description</MudText>
+                }
+            </MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">
+                    @context.Status
+                </MudChip>
+                @if (context.IsExpired)
+                {
+                    <MudChip T="string" Color="Color.Error" Size="Size.Small" Class="ml-1">
+                        Expired
+                    </MudChip>
+                }
+            </MudTd>
+            <MudTd DataLabel="Created Date">@context.CreatedDate.ToString("MMM dd, yyyy")</MudTd>
+            <MudTd DataLabel="Expiry Date">
+                @if (context.ExpiryDate.HasValue)
+                {
+                    <MudText Typo="Typo.body2" Color="@(context.IsExpired ? Color.Error : Color.Default)">
+                        @context.ExpiryDate.Value.ToString("MMM dd, yyyy")
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">-</MudText>
+                }
+            </MudTd>
+            <MudTd DataLabel="Total">
+                <MudText Typo="Typo.body1" Style="font-weight: 500;">@context.Total.ToString("C")</MudText>
+            </MudTd>
+            <MudTd DataLabel="Actions">
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" 
+                                  Color="Color.Primary" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => ViewEstimate(context.Id))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                  Color="Color.Secondary" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => EditEstimate(context.Id))" />
+                    @if (context.Status == EstimateStatus.Draft)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Send" 
+                                      Color="Color.Info" 
+                                      Size="Size.Small"
+                                      OnClick="@(() => SendEstimate(context))" />
+                    }
+                    @if (context.CanBeConverted)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Receipt" 
+                                      Color="Color.Success" 
+                                      Size="Size.Small"
+                                      OnClick="@(() => ConvertToInvoice(context))" />
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                  Color="Color.Error" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => DeleteEstimate(context))" />
+                </MudStack>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<Estimate> _estimates = new();
+    private IEnumerable<Estimate> _filteredEstimates = new List<Estimate>();
+    private bool _loading = true;
+    private string _searchString = string.Empty;
+    private EstimateStatus? _selectedStatus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Estimate List Viewed");
+        await LoadEstimates();
+    }
+
+    private async Task LoadEstimates()
+    {
+        _loading = true;
+        try
+        {
+            _estimates = await EstimateService.GetAllEstimatesAsync();
+            FilterEstimates();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void FilterEstimates()
+    {
+        var filtered = _estimates.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            var searchTerm = _searchString.ToLower();
+            filtered = filtered.Where(e => 
+                e.EstimateNumber.ToLower().Contains(searchTerm) ||
+                e.Title.ToLower().Contains(searchTerm) ||
+                e.Description.ToLower().Contains(searchTerm) ||
+                (e.Customer?.DisplayName?.ToLower().Contains(searchTerm) ?? false) ||
+                (e.Customer?.Email?.ToLower().Contains(searchTerm) ?? false));
+        }
+
+        if (_selectedStatus.HasValue)
+        {
+            filtered = filtered.Where(e => e.Status == _selectedStatus.Value);
+        }
+
+        _filteredEstimates = filtered.ToList();
+        StateHasChanged();
+    }
+
+    private async Task OnSearch(string searchTerm)
+    {
+        _searchString = searchTerm;
+        FilterEstimates();
+    }
+
+    private Color GetStatusColor(EstimateStatus status)
+    {
+        return status switch
+        {
+            EstimateStatus.Draft => Color.Default,
+            EstimateStatus.Sent => Color.Info,
+            EstimateStatus.Accepted => Color.Success,
+            EstimateStatus.Rejected => Color.Error,
+            EstimateStatus.Expired => Color.Warning,
+            EstimateStatus.Converted => Color.Primary,
+            _ => Color.Default
+        };
+    }
+
+    private void CreateEstimate()
+    {
+        Navigation.NavigateTo("/estimates/create");
+    }
+
+    private void ViewEstimate(Guid id)
+    {
+        Navigation.NavigateTo($"/estimates/{id}");
+    }
+
+    private void EditEstimate(Guid id)
+    {
+        Navigation.NavigateTo($"/estimates/{id}/edit");
+    }
+
+    private async Task SendEstimate(Estimate estimate)
+    {
+        try
+        {
+            await EstimateService.SendEstimateAsync(estimate.Id);
+            Snackbar.Add($"Estimate {estimate.DisplayNumber} sent successfully", Severity.Success);
+            await LoadEstimates();
+            await UIPersonalizationService.LogAccessAsync("Estimate Sent", estimate.DisplayNumber);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error sending estimate: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ConvertToInvoice(Estimate estimate)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Convert estimate '{estimate.DisplayNumber}' to invoice? This will create a new invoice and mark the estimate as converted.",
+            ["ButtonText"] = "Convert",
+            ["Color"] = Color.Success
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Convert to Invoice", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                await EstimateService.ConvertToInvoiceAsync(estimate.Id);
+                Snackbar.Add($"Estimate {estimate.DisplayNumber} converted to invoice successfully", Severity.Success);
+                await LoadEstimates();
+                await UIPersonalizationService.LogAccessAsync("Estimate Converted", estimate.DisplayNumber);
+                Navigation.NavigateTo("/invoices");
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error converting estimate: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteEstimate(Estimate estimate)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Are you sure you want to delete estimate '{estimate.DisplayNumber}'? This action cannot be undone.",
+            ["ButtonText"] = "Delete",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Delete Estimate", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var success = await EstimateService.DeleteEstimateAsync(estimate.Id);
+            if (success)
+            {
+                Snackbar.Add($"Estimate '{estimate.DisplayNumber}' deleted successfully", Severity.Success);
+                await LoadEstimates();
+                await UIPersonalizationService.LogAccessAsync("Estimate Deleted", estimate.DisplayNumber);
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete estimate", Severity.Error);
+            }
+        }
+    }
+}

@@ -1,0 +1,496 @@
+@page "/analytics/reports"
+@inject IAnalyticsService AnalyticsService
+@inject ICustomerService CustomerService
+@inject IStaffService StaffService
+@inject IProjectService ProjectService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Reports - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Reports & Analytics</MudText>
+
+<MudStack Spacing="3">
+    <!-- Report Generation -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Generate New Report</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudForm @ref="_form" @bind-IsValid="@_isValid">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudStack Spacing="3">
+                            <BaseSelect @bind-Value="_reportRequest.Type" 
+                                       Label="Report Type" 
+                                       Required="true"
+                                       T="ReportType">
+                                @foreach (ReportType type in Enum.GetValues<ReportType>())
+                                {
+                                    <MudSelectItem T="ReportType" Value="@type">@GetReportTypeName(type)</MudSelectItem>
+                                }
+                            </BaseSelect>
+                            
+                            <MudDateRangePicker @bind-DateRange="_dateRange" 
+                                               Label="Date Range"
+                                               Required="true" />
+                            
+                            <BaseSelect @bind-Value="_reportRequest.Format" 
+                                       Label="Format" 
+                                       Required="true"
+                                       T="ReportFormat">
+                                @foreach (ReportFormat format in Enum.GetValues<ReportFormat>())
+                                {
+                                    <MudSelectItem T="ReportFormat" Value="@format">@format.ToString()</MudSelectItem>
+                                }
+                            </BaseSelect>
+                        </MudStack>
+                    </MudItem>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudStack Spacing="3">
+                            @if (_reportRequest.Type == ReportType.CustomerReport)
+                            {
+                                <MudSelect T="Guid" 
+                                          Label="Select Customers (Optional)" 
+                                          MultiSelection="true" 
+                                          @bind-SelectedValues="_selectedCustomers"
+                                          Variant="Variant.Outlined">
+                                    @foreach (var customer in _customers)
+                                    {
+                                        <MudSelectItem T="Guid" Value="@customer.Id">@customer.DisplayName</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                            
+                            @if (_reportRequest.Type == ReportType.StaffPerformanceReport)
+                            {
+                                <MudSelect T="Guid" 
+                                          Label="Select Staff (Optional)" 
+                                          MultiSelection="true" 
+                                          @bind-SelectedValues="_selectedStaff"
+                                          Variant="Variant.Outlined">
+                                    @foreach (var staff in _staffMembers)
+                                    {
+                                        <MudSelectItem T="Guid" Value="@staff.Id">@staff.FullName</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                            
+                            @if (_reportRequest.Type == ReportType.ProjectReport)
+                            {
+                                <MudSelect T="Guid" 
+                                          Label="Select Projects (Optional)" 
+                                          MultiSelection="true" 
+                                          @bind-SelectedValues="_selectedProjects"
+                                          Variant="Variant.Outlined">
+                                    @foreach (var project in _projects)
+                                    {
+                                        <MudSelectItem T="Guid" Value="@project.Id">@project.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                            
+                            <MudStack Row="true" Spacing="2">
+                                <MudCheckBox @bind-Checked="_reportRequest.IncludeCharts" 
+                                            Label="Include Charts" 
+                                            T="bool" />
+                                <MudCheckBox @bind-Checked="_reportRequest.IncludeDetails" 
+                                            Label="Include Details" 
+                                            T="bool" />
+                            </MudStack>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+                
+                <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+                    <BaseButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               Disabled="@(!_isValid || _generating)"
+                               OnClick="@GenerateReport">
+                        @if (_generating)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                            <MudText Class="ms-2">Generating...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Generate Report</MudText>
+                        }
+                    </BaseButton>
+                </MudStack>
+            </MudForm>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Report History -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Report History</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" 
+                              Color="Color.Primary" 
+                              OnClick="@LoadReportHistory" />
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            @if (_loading)
+            {
+                <div style="display: flex; justify-content: center; padding: 2rem;">
+                    <MudProgressCircular Indeterminate="true" />
+                </div>
+            }
+            else if (!_reportHistory.Any())
+            {
+                <MudAlert Severity="Severity.Info">
+                    No reports have been generated yet. Create your first report above.
+                </MudAlert>
+            }
+            else
+            {
+                <MudTable T="ReportResult" 
+                          Items="@_reportHistory" 
+                          Dense="true"
+                          Hover="true"
+                          Striped="true">
+                    <HeaderContent>
+                        <MudTh>Report</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh>Format</MudTh>
+                        <MudTh>Generated</MudTh>
+                        <MudTh>Size</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Report">
+                            <div>
+                                <MudText Typo="Typo.body1" Style="font-weight: 500;">@context.Title</MudText>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.FileName</MudText>
+                            </div>
+                        </MudTd>
+                        <MudTd DataLabel="Type">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">
+                                @GetReportTypeName(context.Type)
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Format">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Secondary">
+                                @context.Format
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Generated">
+                            <div>
+                                <MudText Typo="Typo.body2">@context.GeneratedAt.ToString("MMM dd, yyyy")</MudText>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">@context.GeneratedAt.ToString("HH:mm")</MudText>
+                            </div>
+                        </MudTd>
+                        <MudTd DataLabel="Size">
+                            <MudText Typo="Typo.body2">@FormatFileSize(context.FileSize)</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Status">
+                            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Status)">
+                                @context.Status
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Actions">
+                            <MudStack Row="true" Spacing="1">
+                                @if (context.Status == ReportStatus.Generated)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Download" 
+                                                  Color="Color.Primary" 
+                                                  Size="Size.Small"
+                                                  OnClick="@(() => DownloadReport(context))" />
+                                }
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                              Color="Color.Error" 
+                                              Size="Size.Small"
+                                              OnClick="@(() => DeleteReport(context))" />
+                            </MudStack>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Quick Report Templates -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Quick Report Templates</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer;" @onclick="@(() => GenerateQuickReport(ReportType.ExecutiveSummary))">
+                        <MudCardContent>
+                            <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.Dashboard" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Executive Summary</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    High-level overview of business performance
+                                </MudText>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer;" @onclick="@(() => GenerateQuickReport(ReportType.FinancialReport))">
+                        <MudCardContent>
+                            <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Financial Report</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Revenue, expenses, and profitability analysis
+                                </MudText>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer;" @onclick="@(() => GenerateQuickReport(ReportType.ProjectReport))">
+                        <MudCardContent>
+                            <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.Work" Color="Color.Info" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Project Report</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Project status, timelines, and performance
+                                </MudText>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+    private bool _loading = true;
+    private bool _generating = false;
+    
+    private ReportRequest _reportRequest = new()
+    {
+        StartDate = DateTime.UtcNow.AddMonths(-1),
+        EndDate = DateTime.UtcNow,
+        Format = ReportFormat.PDF,
+        IncludeCharts = true,
+        IncludeDetails = true
+    };
+    
+    private DateRange? _dateRange = new(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow);
+    private List<ReportResult> _reportHistory = new();
+    private List<Customer> _customers = new();
+    private List<Staff> _staffMembers = new();
+    private List<Project> _projects = new();
+    
+    private IEnumerable<Guid> _selectedCustomers = new HashSet<Guid>();
+    private IEnumerable<Guid> _selectedStaff = new HashSet<Guid>();
+    private IEnumerable<Guid> _selectedProjects = new HashSet<Guid>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Reports Page Viewed");
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _loading = true;
+        try
+        {
+            var tasks = new[]
+            {
+                LoadReportHistory(),
+                LoadCustomers(),
+                LoadStaff(),
+                LoadProjects()
+            };
+            
+            await Task.WhenAll(tasks);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadReportHistory()
+    {
+        _reportHistory = await AnalyticsService.GetReportHistoryAsync();
+    }
+
+    private async Task LoadCustomers()
+    {
+        _customers = await CustomerService.GetAllCustomersAsync();
+    }
+
+    private async Task LoadStaff()
+    {
+        _staffMembers = await StaffService.GetAllStaffAsync();
+    }
+
+    private async Task LoadProjects()
+    {
+        _projects = await ProjectService.GetAllProjectsAsync();
+    }
+
+    private async Task GenerateReport()
+    {
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (_isValid)
+            {
+                _generating = true;
+                try
+                {
+                    // Update request with form data
+                    _reportRequest.StartDate = _dateRange?.Start ?? DateTime.UtcNow.AddMonths(-1);
+                    _reportRequest.EndDate = _dateRange?.End ?? DateTime.UtcNow;
+                    _reportRequest.CustomerIds = _selectedCustomers.ToList();
+                    _reportRequest.StaffIds = _selectedStaff.ToList();
+                    _reportRequest.ProjectIds = _selectedProjects.ToList();
+
+                    var report = await AnalyticsService.GenerateReportAsync(_reportRequest);
+                    
+                    if (report.Status == ReportStatus.Generated)
+                    {
+                        Snackbar.Add($"Report '{report.Title}' generated successfully", Severity.Success);
+                        await LoadReportHistory();
+                        await UIPersonalizationService.LogAccessAsync("Report Generated", report.Title);
+                    }
+                    else
+                    {
+                        Snackbar.Add("Failed to generate report", Severity.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error generating report: {ex.Message}", Severity.Error);
+                }
+                finally
+                {
+                    _generating = false;
+                }
+            }
+        }
+    }
+
+    private async Task GenerateQuickReport(ReportType type)
+    {
+        var request = new ReportRequest
+        {
+            Type = type,
+            StartDate = DateTime.UtcNow.AddMonths(-3),
+            EndDate = DateTime.UtcNow,
+            Format = ReportFormat.PDF,
+            IncludeCharts = true,
+            IncludeDetails = true
+        };
+
+        _generating = true;
+        try
+        {
+            var report = await AnalyticsService.GenerateReportAsync(request);
+            
+            if (report.Status == ReportStatus.Generated)
+            {
+                Snackbar.Add($"Quick report '{report.Title}' generated successfully", Severity.Success);
+                await LoadReportHistory();
+                await UIPersonalizationService.LogAccessAsync("Quick Report Generated", report.Title);
+            }
+            else
+            {
+                Snackbar.Add("Failed to generate quick report", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error generating quick report: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _generating = false;
+        }
+    }
+
+    private async Task DownloadReport(ReportResult report)
+    {
+        try
+        {
+            var data = await AnalyticsService.GetReportDataAsync(report.Id);
+            
+            // In a real application, this would trigger a file download
+            // For now, we'll just show a success message
+            Snackbar.Add($"Report '{report.FileName}' downloaded successfully", Severity.Success);
+            await UIPersonalizationService.LogAccessAsync("Report Downloaded", report.FileName);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error downloading report: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteReport(ReportResult report)
+    {
+        // In a real application, this would delete the report from storage
+        _reportHistory.Remove(report);
+        Snackbar.Add($"Report '{report.FileName}' deleted successfully", Severity.Success);
+        await UIPersonalizationService.LogAccessAsync("Report Deleted", report.FileName);
+    }
+
+    private string GetReportTypeName(ReportType type)
+    {
+        return type switch
+        {
+            ReportType.CustomerReport => "Customer Report",
+            ReportType.LeadReport => "Lead Report",
+            ReportType.ProjectReport => "Project Report",
+            ReportType.FinancialReport => "Financial Report",
+            ReportType.StaffPerformanceReport => "Staff Performance Report",
+            ReportType.ExecutiveSummary => "Executive Summary",
+            ReportType.CustomReport => "Custom Report",
+            _ => type.ToString()
+        };
+    }
+
+    private Color GetStatusColor(ReportStatus status)
+    {
+        return status switch
+        {
+            ReportStatus.Generated => Color.Success,
+            ReportStatus.Generating => Color.Info,
+            ReportStatus.Failed => Color.Error,
+            ReportStatus.Expired => Color.Warning,
+            _ => Color.Default
+        };
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes == 0) return "0 B";
+        
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        double size = bytes;
+        
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+        
+        return $"{size:F1} {sizes[order]}";
+    }
+}

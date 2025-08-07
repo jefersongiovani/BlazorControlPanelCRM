@@ -1,0 +1,305 @@
+@namespace BlazorControlPanel.Components.Projects
+@inject IProjectService ProjectService
+@inject ICustomerService CustomerService
+@inject IStaffService StaffService
+@inject ISnackbar Snackbar
+
+<MudForm @ref="_form" @bind-IsValid="@_isValid" Model="@Project">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Project Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <BaseTextField @bind-Value="Project.Name" 
+                                     Label="Project Name" 
+                                     Required="true"
+                                     RequiredError="Project name is required"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Project.Description" 
+                                     Label="Description" 
+                                     Lines="3"
+                                     T="string" />
+                        
+                        <BaseSelect @bind-Value="Project.CustomerId" 
+                                  Label="Customer" 
+                                  Required="true"
+                                  RequiredError="Customer is required"
+                                  T="Guid">
+                            @foreach (var customer in _customers)
+                            {
+                                <MudSelectItem T="Guid" Value="@customer.Id">@customer.DisplayName</MudSelectItem>
+                            }
+                        </BaseSelect>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Project.Status" 
+                                          Label="Status" 
+                                          Required="true"
+                                          T="ProjectStatus">
+                                    @foreach (ProjectStatus status in Enum.GetValues<ProjectStatus>())
+                                    {
+                                        <MudSelectItem T="ProjectStatus" Value="@status">@status.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Project.Priority" 
+                                          Label="Priority" 
+                                          Required="true"
+                                          T="ProjectPriority">
+                                    @foreach (ProjectPriority priority in Enum.GetValues<ProjectPriority>())
+                                    {
+                                        <MudSelectItem T="ProjectPriority" Value="@priority">@priority.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseSelect @bind-Value="Project.Type" 
+                                  Label="Project Type" 
+                                  Required="true"
+                                  T="ProjectType">
+                            @foreach (ProjectType type in Enum.GetValues<ProjectType>())
+                            {
+                                <MudSelectItem T="ProjectType" Value="@type">@type.ToString()</MudSelectItem>
+                            }
+                        </BaseSelect>
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Timeline & Budget</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudDatePicker @bind-Date="@_startDate" 
+                                              Label="Start Date" 
+                                              Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudDatePicker @bind-Date="@_endDate" 
+                                              Label="End Date" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudNumericField @bind-Value="Project.Budget" 
+                                               Label="Budget" 
+                                               Format="C0"
+                                               Culture="@System.Globalization.CultureInfo.CurrentCulture"
+                                               T="decimal" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudNumericField @bind-Value="Project.EstimatedHours" 
+                                               Label="Estimated Hours" 
+                                               Min="0"
+                                               T="int" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        @if (IsEditMode)
+                        {
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudNumericField @bind-Value="Project.ActualCost" 
+                                                   Label="Actual Cost" 
+                                                   Format="C0"
+                                                   Culture="@System.Globalization.CultureInfo.CurrentCulture"
+                                                   T="decimal" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudNumericField @bind-Value="Project.ProgressPercentage" 
+                                                   Label="Progress %" 
+                                                   Min="0"
+                                                   Max="100"
+                                                   T="decimal" />
+                                </MudItem>
+                            </MudGrid>
+                        }
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Team Assignment</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <BaseSelect @bind-Value="Project.ProjectManagerId" 
+                                  Label="Project Manager" 
+                                  Clearable="true"
+                                  T="Guid?">
+                            <MudSelectItem T="Guid?" Value="@((Guid?)null)">No Manager Assigned</MudSelectItem>
+                            @foreach (var staff in _staffMembers)
+                            {
+                                <MudSelectItem T="Guid?" Value="@staff.Id">@staff.FullName - @staff.JobTitle</MudSelectItem>
+                            }
+                        </BaseSelect>
+                        
+                        <div>
+                            <MudText Typo="Typo.subtitle1" Class="mb-2">Team Members</MudText>
+                            <MudGrid>
+                                @foreach (var staff in _staffMembers)
+                                {
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudCheckBox Checked="@GetTeamMemberSelection(staff.Id)"
+                                                    CheckedChanged="@((bool value) => SetTeamMemberSelection(staff.Id, value))"
+                                                    Label="@($"{staff.FullName} - {staff.JobTitle}")"
+                                                    T="bool" />
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </div>
+                        
+                        <BaseTextField @bind-Value="Project.Notes" 
+                                     Label="Notes" 
+                                     Lines="4"
+                                     T="string" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+    </MudGrid>
+</MudForm>
+
+<MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+    <BaseButton Variant="Variant.Text" 
+               OnClick="@HandleCancel">
+        Cancel
+    </BaseButton>
+    <BaseButton Variant="Variant.Filled" 
+               Color="Color.Primary" 
+               Disabled="@(!_isValid || _saving)"
+               OnClick="@HandleSave">
+        @if (_saving)
+        {
+            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+            <MudText Class="ms-2">Saving...</MudText>
+        }
+        else
+        {
+            <MudText>@(IsEditMode ? "Update" : "Create") Project</MudText>
+        }
+    </BaseButton>
+</MudStack>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+    private bool _saving;
+    private DateTime? _startDate;
+    private DateTime? _endDate;
+    private List<Customer> _customers = new();
+    private List<Staff> _staffMembers = new();
+    private Dictionary<Guid, bool> _teamMemberSelections = new();
+
+    [Parameter] public Project Project { get; set; } = new();
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Project> OnSave { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _startDate = Project.StartDate;
+        _endDate = Project.EndDate;
+        
+        _customers = await CustomerService.GetAllCustomersAsync();
+        _staffMembers = await StaffService.GetAllStaffAsync();
+        
+        // Initialize team member selections
+        foreach (var staff in _staffMembers)
+        {
+            _teamMemberSelections[staff.Id] = Project.TeamMemberIds.Contains(staff.Id);
+        }
+    }
+
+    private bool GetTeamMemberSelection(Guid staffId)
+    {
+        return _teamMemberSelections.GetValueOrDefault(staffId, false);
+    }
+
+    private void SetTeamMemberSelection(Guid staffId, bool value)
+    {
+        _teamMemberSelections[staffId] = value;
+    }
+
+    private async Task HandleSave()
+    {
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (_isValid)
+            {
+                _saving = true;
+                try
+                {
+                    if (_startDate.HasValue)
+                        Project.StartDate = _startDate.Value;
+                        
+                    if (_endDate.HasValue)
+                        Project.EndDate = _endDate.Value;
+
+                    // Update team member IDs based on selections
+                    Project.TeamMemberIds = _teamMemberSelections
+                        .Where(kvp => kvp.Value)
+                        .Select(kvp => kvp.Key)
+                        .ToList();
+
+                    Project savedProject;
+                    if (IsEditMode)
+                    {
+                        savedProject = await ProjectService.UpdateProjectAsync(Project);
+                        Snackbar.Add($"Project '{savedProject.Name}' updated successfully", Severity.Success);
+                    }
+                    else
+                    {
+                        savedProject = await ProjectService.CreateProjectAsync(Project);
+                        Snackbar.Add($"Project '{savedProject.Name}' created successfully", Severity.Success);
+                    }
+                    
+                    await OnSave.InvokeAsync(savedProject);
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error saving project: {ex.Message}", Severity.Error);
+                }
+                finally
+                {
+                    _saving = false;
+                }
+            }
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

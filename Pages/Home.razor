@@ -1,0 +1,201 @@
+﻿@page "/"
+@inject IUIPersonalizationService UIPersonalizationService
+
+<PageTitle>Dashboard - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
+<MudText Class="mb-8">Welcome to your CRM Control Panel</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <BaseCard>
+            <HeaderContent>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Customers</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+            </HeaderContent>
+            <ChildContent>
+                <MudText Typo="Typo.h4" Align="Align.Center">@_customerCount</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center">Total Customers</MudText>
+            </ChildContent>
+            <ActionsContent>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true" Href="/customers">
+                    View All
+                </MudButton>
+            </ActionsContent>
+        </BaseCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <BaseCard>
+            <HeaderContent>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Projects</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.Work" Color="Color.Secondary" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+            </HeaderContent>
+            <ChildContent>
+                <MudText Typo="Typo.h4" Align="Align.Center">@_projectCount</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center">Active Projects</MudText>
+            </ChildContent>
+            <ActionsContent>
+                <MudButton Variant="Variant.Text" Color="Color.Secondary" FullWidth="true" Href="/projects">
+                    View All
+                </MudButton>
+            </ActionsContent>
+        </BaseCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <BaseCard>
+            <HeaderContent>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Leads</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Success" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+            </HeaderContent>
+            <ChildContent>
+                <MudText Typo="Typo.h4" Align="Align.Center">@_leadCount</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center">Open Leads</MudText>
+            </ChildContent>
+            <ActionsContent>
+                <MudButton Variant="Variant.Text" Color="Color.Success" FullWidth="true" Href="/leads">
+                    View All
+                </MudButton>
+            </ActionsContent>
+        </BaseCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <BaseCard>
+            <HeaderContent>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Revenue</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Warning" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+            </HeaderContent>
+            <ChildContent>
+                <MudText Typo="Typo.h4" Align="Align.Center">@_revenue.ToString("C")</MudText>
+                <MudText Typo="Typo.body2" Align="Align.Center">This Month</MudText>
+            </ChildContent>
+            <ActionsContent>
+                <MudButton Variant="Variant.Text" Color="Color.Warning" FullWidth="true" Href="/invoices">
+                    View Details
+                </MudButton>
+            </ActionsContent>
+        </BaseCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-8">
+    <MudItem xs="12" md="8">
+        <BaseCard>
+            <HeaderContent>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Recent Activity</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </HeaderContent>
+            <ChildContent>
+                <MudList T="string">
+                    @foreach (var activity in _recentActivities)
+                    {
+                        <MudListItem T="string" Icon="@activity.Icon" Text="@activity.Description">
+                            <NestedList>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                                    @activity.Timestamp.ToString("MMM dd, yyyy HH:mm")
+                                </MudText>
+                            </NestedList>
+                        </MudListItem>
+                        <MudDivider />
+                    }
+                </MudList>
+            </ChildContent>
+        </BaseCard>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <BaseCard>
+            <HeaderContent>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Quick Actions</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </HeaderContent>
+            <ChildContent>
+                <MudStack>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                              StartIcon="@Icons.Material.Filled.PersonAdd" Href="/customers/create">
+                        Add Customer
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true"
+                              StartIcon="@Icons.Material.Filled.Add" Href="/projects/create">
+                        New Project
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true"
+                              StartIcon="@Icons.Material.Filled.RequestQuote" Href="/estimates/create">
+                        Create Estimate
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" FullWidth="true"
+                              StartIcon="@Icons.Material.Filled.Receipt" Href="/invoices/create">
+                        New Invoice
+                    </MudButton>
+                </MudStack>
+            </ChildContent>
+        </BaseCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int _customerCount = 0;
+    private int _projectCount = 0;
+    private int _leadCount = 0;
+    private decimal _revenue = 0;
+    private List<ActivityItem> _recentActivities = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Dashboard Viewed");
+
+        // Simulate loading data - in real app, this would come from services
+        _customerCount = 156;
+        _projectCount = 23;
+        _leadCount = 47;
+        _revenue = 125430.50m;
+
+        _recentActivities = new List<ActivityItem>
+        {
+            new() { Icon = Icons.Material.Filled.PersonAdd, Description = "New customer 'ABC Corp' added", Timestamp = DateTime.Now.AddMinutes(-15) },
+            new() { Icon = Icons.Material.Filled.Work, Description = "Project 'Website Redesign' completed", Timestamp = DateTime.Now.AddHours(-2) },
+            new() { Icon = Icons.Material.Filled.Receipt, Description = "Invoice #1234 sent to client", Timestamp = DateTime.Now.AddHours(-4) },
+            new() { Icon = Icons.Material.Filled.TrendingUp, Description = "New lead from contact form", Timestamp = DateTime.Now.AddHours(-6) },
+            new() { Icon = Icons.Material.Filled.MoneyOff, Description = "Expense report submitted", Timestamp = DateTime.Now.AddDays(-1) }
+        };
+    }
+
+    private class ActivityItem
+    {
+        public string Icon { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+}

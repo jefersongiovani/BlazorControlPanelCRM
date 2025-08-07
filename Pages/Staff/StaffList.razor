@@ -1,0 +1,255 @@
+@page "/staff"
+@inject IStaffService StaffService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Staff - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Staff Management</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField @bind-Value="_searchString" 
+                     Placeholder="Search staff..." 
+                     Adornment="Adornment.Start" 
+                     AdornmentIcon="@Icons.Material.Filled.Search"
+                     IconSize="Size.Medium"
+                     Class="mt-0"
+                     Immediate="true"
+                     DebounceInterval="300"
+                     OnDebounceIntervalElapsed="@OnSearch" />
+        
+        <MudStack Row="true" Spacing="2">
+            <BaseSelect @bind-Value="_selectedStatus" 
+                       Label="Status Filter" 
+                       Clearable="true"
+                       T="StaffStatus?"
+                       Class="min-width-150">
+                <MudSelectItem T="StaffStatus?" Value="@((StaffStatus?)null)">All Statuses</MudSelectItem>
+                @foreach (StaffStatus status in Enum.GetValues<StaffStatus>())
+                {
+                    <MudSelectItem T="StaffStatus?" Value="@status">@status.ToString()</MudSelectItem>
+                }
+            </BaseSelect>
+            
+            <BaseSelect @bind-Value="_selectedDepartment" 
+                       Label="Department Filter" 
+                       Clearable="true"
+                       T="string"
+                       Class="min-width-150">
+                <MudSelectItem T="string" Value="@((string)null)">All Departments</MudSelectItem>
+                @foreach (var department in _departments)
+                {
+                    <MudSelectItem T="string" Value="@department">@department</MudSelectItem>
+                }
+            </BaseSelect>
+            
+            <BaseButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@CreateStaff">
+                Add Staff
+            </BaseButton>
+        </MudStack>
+    </MudStack>
+
+    <MudTable T="Staff" 
+              Items="@_filteredStaff" 
+              Loading="@_loading"
+              Dense="false"
+              Hover="true"
+              Striped="true"
+              Bordered="true"
+              FixedHeader="true"
+              Height="600px">
+        
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Staff List</MudText>
+            <MudSpacer />
+            <MudText Typo="Typo.body2">@_filteredStaff.Count() staff members found</MudText>
+        </ToolBarContent>
+        
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Job Title</MudTh>
+            <MudTh>Department</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Employment Type</MudTh>
+            <MudTh>Hire Date</MudTh>
+            <MudTh>Salary</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        
+        <RowTemplate>
+            <MudTd DataLabel="Name">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Color="Color.Primary" Size="Size.Small">
+                        @context.FirstName.FirstOrDefault()@context.LastName.FirstOrDefault()
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body1">@context.FullName</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.Phone</MudText>
+                    </div>
+                </MudStack>
+            </MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Job Title">@context.JobTitle</MudTd>
+            <MudTd DataLabel="Department">@context.Department</MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">
+                    @context.Status
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Employment Type">@context.EmploymentType</MudTd>
+            <MudTd DataLabel="Hire Date">@context.HireDate.ToString("MMM dd, yyyy")</MudTd>
+            <MudTd DataLabel="Salary">@context.Salary.ToString("C")</MudTd>
+            <MudTd DataLabel="Actions">
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" 
+                                  Color="Color.Primary" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => ViewStaff(context.Id))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                  Color="Color.Secondary" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => EditStaff(context.Id))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                  Color="Color.Error" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => DeleteStaff(context))" />
+                </MudStack>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<Staff> _staff = new();
+    private IEnumerable<Staff> _filteredStaff = new List<Staff>();
+    private List<string> _departments = new();
+    private bool _loading = true;
+    private string _searchString = string.Empty;
+    private StaffStatus? _selectedStatus;
+    private string? _selectedDepartment;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Staff List Viewed");
+        await LoadStaff();
+        await LoadDepartments();
+    }
+
+    private async Task LoadStaff()
+    {
+        _loading = true;
+        try
+        {
+            _staff = await StaffService.GetAllStaffAsync();
+            FilterStaff();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadDepartments()
+    {
+        _departments = await StaffService.GetDepartmentsAsync();
+    }
+
+    private void FilterStaff()
+    {
+        var filtered = _staff.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            var searchTerm = _searchString.ToLower();
+            filtered = filtered.Where(s => 
+                s.FirstName.ToLower().Contains(searchTerm) ||
+                s.LastName.ToLower().Contains(searchTerm) ||
+                s.Email.ToLower().Contains(searchTerm) ||
+                s.JobTitle.ToLower().Contains(searchTerm) ||
+                s.Department.ToLower().Contains(searchTerm) ||
+                s.Phone.Contains(searchTerm));
+        }
+
+        if (_selectedStatus.HasValue)
+        {
+            filtered = filtered.Where(s => s.Status == _selectedStatus.Value);
+        }
+
+        if (!string.IsNullOrEmpty(_selectedDepartment))
+        {
+            filtered = filtered.Where(s => s.Department.Equals(_selectedDepartment, StringComparison.OrdinalIgnoreCase));
+        }
+
+        _filteredStaff = filtered.ToList();
+        StateHasChanged();
+    }
+
+    private async Task OnSearch(string searchTerm)
+    {
+        _searchString = searchTerm;
+        FilterStaff();
+    }
+
+    private Color GetStatusColor(StaffStatus status)
+    {
+        return status switch
+        {
+            StaffStatus.Active => Color.Success,
+            StaffStatus.Inactive => Color.Default,
+            StaffStatus.OnLeave => Color.Warning,
+            StaffStatus.Terminated => Color.Error,
+            StaffStatus.Suspended => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private void CreateStaff()
+    {
+        Navigation.NavigateTo("/staff/create");
+    }
+
+    private void ViewStaff(Guid id)
+    {
+        Navigation.NavigateTo($"/staff/{id}");
+    }
+
+    private void EditStaff(Guid id)
+    {
+        Navigation.NavigateTo($"/staff/{id}/edit");
+    }
+
+    private async Task DeleteStaff(Staff staff)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Are you sure you want to delete staff member '{staff.FullName}'? This action cannot be undone.",
+            ["ButtonText"] = "Delete",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Delete Staff Member", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var success = await StaffService.DeleteStaffAsync(staff.Id);
+            if (success)
+            {
+                Snackbar.Add($"Staff member '{staff.FullName}' deleted successfully", Severity.Success);
+                await LoadStaff();
+                await UIPersonalizationService.LogAccessAsync("Staff Deleted", staff.FullName);
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete staff member", Severity.Error);
+            }
+        }
+    }
+}

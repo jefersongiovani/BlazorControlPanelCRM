@@ -1,0 +1,44 @@
+@page "/leads/create"
+@inject NavigationManager Navigation
+@inject IUIPersonalizationService UIPersonalizationService
+
+<PageTitle>Create Lead - Control Painel CRM</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbItems" />
+
+<MudText Typo="Typo.h3" GutterBottom="true">Create New Lead</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <LeadForm Lead="@_lead" 
+              IsEditMode="false"
+              OnSave="@OnLeadSaved"
+              OnCancel="@OnCancel" />
+</MudPaper>
+
+@code {
+    private Lead _lead = new();
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Create Lead Page Viewed");
+        
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: "/", icon: Icons.Material.Filled.Home),
+            new BreadcrumbItem("Leads", href: "/leads", icon: Icons.Material.Filled.TrendingUp),
+            new BreadcrumbItem("Create Lead", href: null, disabled: true, icon: Icons.Material.Filled.Add)
+        };
+    }
+
+    private async Task OnLeadSaved(Lead lead)
+    {
+        await UIPersonalizationService.LogAccessAsync("Lead Created", lead.DisplayName);
+        Navigation.NavigateTo("/leads");
+    }
+
+    private void OnCancel()
+    {
+        Navigation.NavigateTo("/leads");
+    }
+}

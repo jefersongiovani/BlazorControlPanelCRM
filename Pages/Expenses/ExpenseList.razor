@@ -1,0 +1,172 @@
+@page "/expenses"
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Expenses - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Expense Management</MudText>
+
+<MudStack Spacing="3">
+    <!-- Quick Actions -->
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h6">Expense Overview</MudText>
+                <MudStack Row="true" Spacing="2">
+                    <BaseButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="@(() => Snackbar.Add("Add Expense feature coming soon", Severity.Info))">
+                        Add Expense
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Outlined" 
+                               Color="Color.Secondary" 
+                               StartIcon="@Icons.Material.Filled.Upload"
+                               OnClick="@(() => Snackbar.Add("Import Expenses feature coming soon", Severity.Info))">
+                        Import
+                    </BaseButton>
+                </MudStack>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Expense Summary Cards -->
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">This Month</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error">$12,450</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Success">↓ 8.2% from last month</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.MoneyOff" Color="Color.Error" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Pending Approval</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning">$3,280</MudText>
+                            <MudText Typo="Typo.caption">12 expenses</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.PendingActions" Color="Color.Warning" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Categories</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info">8</MudText>
+                            <MudText Typo="Typo.caption">Active categories</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.Category" Color="Color.Info" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Average/Month</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">$11,850</MudText>
+                            <MudText Typo="Typo.caption">Last 6 months</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Primary" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Expense Categories -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Expense Categories</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                @foreach (var category in _expenseCategories)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Outlined="true">
+                            <MudCardContent>
+                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                    <div>
+                                        <MudText Typo="Typo.subtitle1" Style="font-weight: 500;">@category.Name</MudText>
+                                        <MudText Typo="Typo.h6" Color="Color.Primary">@category.Amount.ToString("C")</MudText>
+                                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@category.Count expenses</MudText>
+                                    </div>
+                                    <MudIcon Icon="@category.Icon" Color="Color.Primary" Size="Size.Large" />
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Coming Soon Notice -->
+    <MudAlert Severity="Severity.Info" Dense="false">
+        <MudText Typo="Typo.body1" Style="font-weight: 500;">Expense Management Module</MudText>
+        <MudText Typo="Typo.body2">
+            The complete expense management system is under development and will include:
+        </MudText>
+        <ul style="margin-top: 8px;">
+            <li>Expense tracking and categorization</li>
+            <li>Receipt upload and management</li>
+            <li>Approval workflows</li>
+            <li>Expense reporting and analytics</li>
+            <li>Integration with accounting systems</li>
+            <li>Mobile expense capture</li>
+        </ul>
+    </MudAlert>
+</MudStack>
+
+@code {
+    private List<ExpenseCategory> _expenseCategories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Expenses Page Viewed");
+        LoadExpenseCategories();
+    }
+
+    private void LoadExpenseCategories()
+    {
+        _expenseCategories = new List<ExpenseCategory>
+        {
+            new() { Name = "Office Supplies", Amount = 1250, Count = 15, Icon = Icons.Material.Filled.Business },
+            new() { Name = "Travel", Amount = 3200, Count = 8, Icon = Icons.Material.Filled.Flight },
+            new() { Name = "Software", Amount = 2100, Count = 12, Icon = Icons.Material.Filled.Computer },
+            new() { Name = "Marketing", Amount = 1800, Count = 6, Icon = Icons.Material.Filled.Campaign },
+            new() { Name = "Utilities", Amount = 950, Count = 4, Icon = Icons.Material.Filled.ElectricBolt },
+            new() { Name = "Equipment", Amount = 2850, Count = 3, Icon = Icons.Material.Filled.Hardware }
+        };
+    }
+
+    public class ExpenseCategory
+    {
+        public string Name { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public int Count { get; set; }
+        public string Icon { get; set; } = string.Empty;
+    }
+}

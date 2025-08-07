@@ -1,0 +1,441 @@
+@page "/analytics/templates"
+@inject IAnalyticsService AnalyticsService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Report Templates - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Advanced Report Templates</MudText>
+
+<MudStack Spacing="3">
+    <!-- Template Categories -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Professional Report Templates</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <!-- Executive Dashboard Template -->
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer; height: 100%;" @onclick="@(() => SelectTemplate("executive"))">
+                        <MudCardContent>
+                            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.BusinessCenter" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Executive Dashboard</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    High-level KPIs and strategic metrics for leadership team
+                                </MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Primary">Premium</MudChip>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Financial Performance Template -->
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer; height: 100%;" @onclick="@(() => SelectTemplate("financial"))">
+                        <MudCardContent>
+                            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Color="Color.Success" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Financial Performance</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Comprehensive financial analysis with P&L, cash flow, and forecasting
+                                </MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success">Standard</MudChip>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Sales Analytics Template -->
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer; height: 100%;" @onclick="@(() => SelectTemplate("sales"))">
+                        <MudCardContent>
+                            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Info" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Sales Analytics</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Pipeline analysis, conversion rates, and sales team performance
+                                </MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info">Standard</MudChip>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Project Portfolio Template -->
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer; height: 100%;" @onclick="@(() => SelectTemplate("projects"))">
+                        <MudCardContent>
+                            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.Work" Color="Color.Warning" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Project Portfolio</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Project status, resource utilization, and delivery performance
+                                </MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning">Standard</MudChip>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Customer Intelligence Template -->
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer; height: 100%;" @onclick="@(() => SelectTemplate("customer"))">
+                        <MudCardContent>
+                            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Secondary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Customer Intelligence</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Customer behavior, lifetime value, and satisfaction analysis
+                                </MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary">Premium</MudChip>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Operational Efficiency Template -->
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Style="cursor: pointer; height: 100%;" @onclick="@(() => SelectTemplate("operations"))">
+                        <MudCardContent>
+                            <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.Settings" Color="Color.Dark" Size="Size.Large" />
+                                <MudText Typo="Typo.h6" Align="Align.Center">Operational Efficiency</MudText>
+                                <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                    Process optimization, resource allocation, and productivity metrics
+                                </MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Dark">Advanced</MudChip>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Template Configuration -->
+    @if (!string.IsNullOrEmpty(_selectedTemplate))
+    {
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Configure @GetTemplateName(_selectedTemplate) Report</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudStack Spacing="3">
+                            <MudTextField @bind-Value="_reportTitle" 
+                                         Label="Report Title" 
+                                         Variant="Variant.Outlined" />
+                            
+                            <MudDateRangePicker @bind-DateRange="_dateRange" 
+                                               Label="Reporting Period"
+                                               Variant="Variant.Outlined" />
+                            
+                            <BaseSelect @bind-Value="_outputFormat" 
+                                       Label="Output Format" 
+                                       T="ReportFormat"
+                                       Variant="Variant.Outlined">
+                                <MudSelectItem T="ReportFormat" Value="ReportFormat.PDF">PDF (Recommended)</MudSelectItem>
+                                <MudSelectItem T="ReportFormat" Value="ReportFormat.Excel">Excel Workbook</MudSelectItem>
+                                <MudSelectItem T="ReportFormat" Value="ReportFormat.CSV">CSV Data</MudSelectItem>
+                            </BaseSelect>
+                        </MudStack>
+                    </MudItem>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudStack Spacing="3">
+                            <MudText Typo="Typo.subtitle1">Template Features</MudText>
+                            
+                            @foreach (var feature in GetTemplateFeatures(_selectedTemplate))
+                            {
+                                <MudCheckBox @bind-Checked="feature.Enabled" 
+                                            Label="@feature.Name" 
+                                            T="bool">
+                                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@feature.Description</MudText>
+                                </MudCheckBox>
+                            }
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+                
+                <MudDivider Class="my-4" />
+                
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudStack Row="true" Spacing="2">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info">
+                            Estimated Generation Time: @GetEstimatedTime(_selectedTemplate)
+                        </MudChip>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success">
+                            Pages: @GetEstimatedPages(_selectedTemplate)
+                        </MudChip>
+                    </MudStack>
+                    
+                    <MudStack Row="true" Spacing="2">
+                        <BaseButton Variant="Variant.Outlined" 
+                                   Color="Color.Secondary" 
+                                   OnClick="@PreviewTemplate">
+                            Preview
+                        </BaseButton>
+                        <BaseButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   OnClick="@GenerateReport"
+                                   Disabled="@_generating">
+                            @if (_generating)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Generating...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Generate Report</MudText>
+                            }
+                        </BaseButton>
+                    </MudStack>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Template Preview -->
+        @if (_showPreview)
+        {
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Template Preview</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" 
+                                      Color="Color.Default" 
+                                      OnClick="@(() => _showPreview = false)" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudPaper Class="pa-4" Style="background-color: var(--mud-palette-background-grey);">
+                        <MudStack Spacing="2">
+                            <MudText Typo="Typo.h4" Align="Align.Center">@_reportTitle</MudText>
+                            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mud-text-secondary">
+                                @GetTemplateName(_selectedTemplate) Report
+                            </MudText>
+                            <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                Period: @_dateRange?.Start?.ToString("MMM dd, yyyy") - @_dateRange?.End?.ToString("MMM dd, yyyy")
+                            </MudText>
+                            
+                            <MudDivider Class="my-3" />
+                            
+                            <MudGrid>
+                                @foreach (var section in GetTemplateSections(_selectedTemplate))
+                                {
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudCard Outlined="true" Style="min-height: 120px;">
+                                            <MudCardContent>
+                                                <MudText Typo="Typo.subtitle2">@(section.Title)</MudText>
+                                                <MudText Typo="Typo.body2" Class="mud-text-secondary">@(section.Description)</MudText>
+                                                @if (section.HasChart)
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="mt-2">Chart Included</MudChip>
+                                                }
+                                            </MudCardContent>
+                                        </MudCard>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudStack>
+                    </MudPaper>
+                </MudCardContent>
+            </MudCard>
+        }
+    }
+</MudStack>
+
+@code {
+    private string _selectedTemplate = string.Empty;
+    private string _reportTitle = string.Empty;
+    private DateRange? _dateRange = new(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow);
+    private ReportFormat _outputFormat = ReportFormat.PDF;
+    private bool _generating = false;
+    private bool _showPreview = false;
+    private List<TemplateFeature> _templateFeatures = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Report Templates Viewed");
+    }
+
+    private void SelectTemplate(string templateId)
+    {
+        _selectedTemplate = templateId;
+        _reportTitle = $"{GetTemplateName(templateId)} Report - {DateTime.UtcNow:MMM yyyy}";
+        _templateFeatures = GetTemplateFeatures(templateId);
+    }
+
+    private string GetTemplateName(string templateId)
+    {
+        return templateId switch
+        {
+            "executive" => "Executive Dashboard",
+            "financial" => "Financial Performance",
+            "sales" => "Sales Analytics",
+            "projects" => "Project Portfolio",
+            "customer" => "Customer Intelligence",
+            "operations" => "Operational Efficiency",
+            _ => "Custom Report"
+        };
+    }
+
+    private List<TemplateFeature> GetTemplateFeatures(string templateId)
+    {
+        return templateId switch
+        {
+            "executive" => new List<TemplateFeature>
+            {
+                new() { Name = "Executive Summary", Description = "High-level KPI overview", Enabled = true },
+                new() { Name = "Financial Highlights", Description = "Revenue and profitability metrics", Enabled = true },
+                new() { Name = "Strategic Initiatives", Description = "Progress on key business objectives", Enabled = true },
+                new() { Name = "Risk Assessment", Description = "Business risks and mitigation strategies", Enabled = false }
+            },
+            "financial" => new List<TemplateFeature>
+            {
+                new() { Name = "P&L Statement", Description = "Profit and loss analysis", Enabled = true },
+                new() { Name = "Cash Flow Analysis", Description = "Cash flow trends and forecasting", Enabled = true },
+                new() { Name = "Budget Variance", Description = "Budget vs actual performance", Enabled = true },
+                new() { Name = "Financial Ratios", Description = "Key financial health indicators", Enabled = false }
+            },
+            "sales" => new List<TemplateFeature>
+            {
+                new() { Name = "Pipeline Analysis", Description = "Sales pipeline health and trends", Enabled = true },
+                new() { Name = "Conversion Metrics", Description = "Lead to customer conversion rates", Enabled = true },
+                new() { Name = "Team Performance", Description = "Individual and team sales metrics", Enabled = true },
+                new() { Name = "Forecasting", Description = "Sales predictions and targets", Enabled = false }
+            },
+            _ => new List<TemplateFeature>()
+        };
+    }
+
+    private string GetEstimatedTime(string templateId)
+    {
+        return templateId switch
+        {
+            "executive" => "2-3 minutes",
+            "financial" => "3-5 minutes",
+            "sales" => "2-4 minutes",
+            "projects" => "4-6 minutes",
+            "customer" => "3-5 minutes",
+            "operations" => "5-8 minutes",
+            _ => "2-3 minutes"
+        };
+    }
+
+    private string GetEstimatedPages(string templateId)
+    {
+        return templateId switch
+        {
+            "executive" => "8-12",
+            "financial" => "15-20",
+            "sales" => "10-15",
+            "projects" => "12-18",
+            "customer" => "10-14",
+            "operations" => "18-25",
+            _ => "8-10"
+        };
+    }
+
+    private List<TemplateSection> GetTemplateSections(string templateId)
+    {
+        return templateId switch
+        {
+            "executive" => new List<TemplateSection>
+            {
+                new() { Title = "Executive Summary", Description = "Key performance indicators", HasChart = false },
+                new() { Title = "Financial Overview", Description = "Revenue and profitability", HasChart = true },
+                new() { Title = "Operational Metrics", Description = "Efficiency and productivity", HasChart = true },
+                new() { Title = "Strategic Progress", Description = "Goal achievement status", HasChart = false }
+            },
+            "financial" => new List<TemplateSection>
+            {
+                new() { Title = "Revenue Analysis", Description = "Income trends and sources", HasChart = true },
+                new() { Title = "Expense Breakdown", Description = "Cost analysis by category", HasChart = true },
+                new() { Title = "Profitability", Description = "Margin analysis and trends", HasChart = true },
+                new() { Title = "Cash Flow", Description = "Liquidity and working capital", HasChart = true }
+            },
+            _ => new List<TemplateSection>()
+        };
+    }
+
+    private async Task PreviewTemplate()
+    {
+        _showPreview = true;
+        await UIPersonalizationService.LogAccessAsync("Template Previewed", _selectedTemplate);
+    }
+
+    private async Task GenerateReport()
+    {
+        _generating = true;
+        try
+        {
+            var request = new ReportRequest
+            {
+                Type = GetReportType(_selectedTemplate),
+                StartDate = _dateRange?.Start ?? DateTime.UtcNow.AddMonths(-1),
+                EndDate = _dateRange?.End ?? DateTime.UtcNow,
+                Format = _outputFormat,
+                IncludeCharts = _templateFeatures.Any(f => f.Name.Contains("Chart") && f.Enabled),
+                IncludeDetails = true
+            };
+
+            var report = await AnalyticsService.GenerateReportAsync(request);
+            
+            if (report.Status == ReportStatus.Generated)
+            {
+                Snackbar.Add($"Report '{_reportTitle}' generated successfully", Severity.Success);
+                await UIPersonalizationService.LogAccessAsync("Template Report Generated", $"{_selectedTemplate} - {_outputFormat}");
+            }
+            else
+            {
+                Snackbar.Add("Failed to generate report", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error generating report: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _generating = false;
+        }
+    }
+
+    private ReportType GetReportType(string templateId)
+    {
+        return templateId switch
+        {
+            "executive" => ReportType.ExecutiveSummary,
+            "financial" => ReportType.FinancialReport,
+            "sales" => ReportType.LeadReport,
+            "projects" => ReportType.ProjectReport,
+            "customer" => ReportType.CustomerReport,
+            "operations" => ReportType.CustomReport,
+            _ => ReportType.CustomReport
+        };
+    }
+
+    // Supporting classes
+    public class TemplateFeature
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool Enabled { get; set; }
+    }
+
+    public class TemplateSection
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool HasChart { get; set; }
+    }
+}

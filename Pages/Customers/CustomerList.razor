@@ -1,0 +1,224 @@
+@page "/customers"
+@inject ICustomerService CustomerService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Customers - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Customers</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField @bind-Value="_searchString" 
+                     Placeholder="Search customers..." 
+                     Adornment="Adornment.Start" 
+                     AdornmentIcon="@Icons.Material.Filled.Search"
+                     IconSize="Size.Medium"
+                     Class="mt-0"
+                     Immediate="true"
+                     DebounceInterval="300"
+                     OnDebounceIntervalElapsed="@OnSearch" />
+        
+        <MudStack Row="true" Spacing="2">
+            <BaseSelect @bind-Value="_selectedStatus" 
+                       Label="Status Filter" 
+                       Clearable="true"
+                       T="CustomerStatus?"
+                       Class="min-width-150">
+                <MudSelectItem T="CustomerStatus?" Value="@((CustomerStatus?)null)">All Statuses</MudSelectItem>
+                @foreach (CustomerStatus status in Enum.GetValues<CustomerStatus>())
+                {
+                    <MudSelectItem T="CustomerStatus?" Value="@status">@status.ToString()</MudSelectItem>
+                }
+            </BaseSelect>
+            
+            <BaseButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@CreateCustomer">
+                Add Customer
+            </BaseButton>
+        </MudStack>
+    </MudStack>
+
+    <MudTable T="Customer"
+              Items="@_filteredCustomers"
+              Loading="@_loading"
+              Dense="false"
+              Hover="true"
+              Striped="true"
+              Bordered="true"
+              FixedHeader="true"
+              Height="600px">
+
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Customer List</MudText>
+            <MudSpacer />
+            <MudText Typo="Typo.body2">@_filteredCustomers.Count() customers found</MudText>
+        </ToolBarContent>
+
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Phone</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Type</MudTh>
+            <MudTh>Revenue</MudTh>
+            <MudTh>Projects</MudTh>
+            <MudTh>Last Contact</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.DisplayName</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Phone">@context.Phone</MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">
+                    @context.Status
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Type">@context.Type</MudTd>
+            <MudTd DataLabel="Revenue">@context.TotalRevenue.ToString("C")</MudTd>
+            <MudTd DataLabel="Projects">@context.ProjectCount</MudTd>
+            <MudTd DataLabel="Last Contact">@(context.LastContactDate?.ToString("MMM dd, yyyy") ?? "Never")</MudTd>
+            <MudTd DataLabel="Actions">
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                  Color="Color.Primary"
+                                  Size="Size.Small"
+                                  OnClick="@(() => ViewCustomer(context.Id))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                  Color="Color.Secondary"
+                                  Size="Size.Small"
+                                  OnClick="@(() => EditCustomer(context.Id))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                  Color="Color.Error"
+                                  Size="Size.Small"
+                                  OnClick="@(() => DeleteCustomer(context))" />
+                </MudStack>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<Customer> _customers = new();
+    private IEnumerable<Customer> _filteredCustomers = new List<Customer>();
+    private bool _loading = true;
+    private string _searchString = string.Empty;
+    private CustomerStatus? _selectedStatus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Customer List Viewed");
+        await LoadCustomers();
+    }
+
+    private async Task LoadCustomers()
+    {
+        _loading = true;
+        try
+        {
+            _customers = await CustomerService.GetAllCustomersAsync();
+            FilterCustomers();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void FilterCustomers()
+    {
+        var filtered = _customers.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            var searchTerm = _searchString.ToLower();
+            filtered = filtered.Where(c =>
+                c.FirstName.ToLower().Contains(searchTerm) ||
+                c.LastName.ToLower().Contains(searchTerm) ||
+                c.Email.ToLower().Contains(searchTerm) ||
+                c.Company.ToLower().Contains(searchTerm) ||
+                c.Phone.Contains(searchTerm));
+        }
+
+        if (_selectedStatus.HasValue)
+        {
+            filtered = filtered.Where(c => c.Status == _selectedStatus.Value);
+        }
+
+        _filteredCustomers = filtered.ToList();
+        StateHasChanged();
+    }
+
+    private async Task OnSearch(string searchTerm)
+    {
+        _searchString = searchTerm;
+        FilterCustomers();
+    }
+
+    private void OnStatusFilterChanged()
+    {
+        FilterCustomers();
+    }
+
+    private Color GetStatusColor(CustomerStatus status)
+    {
+        return status switch
+        {
+            CustomerStatus.Active => Color.Success,
+            CustomerStatus.Inactive => Color.Default,
+            CustomerStatus.Prospect => Color.Info,
+            CustomerStatus.Lead => Color.Warning,
+            CustomerStatus.Archived => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private void CreateCustomer()
+    {
+        Navigation.NavigateTo("/customers/create");
+    }
+
+    private void ViewCustomer(Guid id)
+    {
+        Navigation.NavigateTo($"/customers/{id}");
+    }
+
+    private void EditCustomer(Guid id)
+    {
+        Navigation.NavigateTo($"/customers/{id}/edit");
+    }
+
+    private async Task DeleteCustomer(Customer customer)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Are you sure you want to delete customer '{customer.DisplayName}'? This action cannot be undone.",
+            ["ButtonText"] = "Delete",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Delete Customer", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var success = await CustomerService.DeleteCustomerAsync(customer.Id);
+            if (success)
+            {
+                Snackbar.Add($"Customer '{customer.DisplayName}' deleted successfully", Severity.Success);
+                await LoadCustomers();
+                await UIPersonalizationService.LogAccessAsync("Customer Deleted", customer.DisplayName);
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete customer", Severity.Error);
+            }
+        }
+    }
+}

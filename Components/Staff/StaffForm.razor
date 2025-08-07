@@ -1,0 +1,285 @@
+@namespace BlazorControlPanel.Components.Staff
+@inject IStaffService StaffService
+@inject ISnackbar Snackbar
+
+<MudForm @ref="_form" @bind-IsValid="@_isValid" Model="@Staff">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Personal Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.FirstName" 
+                                             Label="First Name" 
+                                             Required="true"
+                                             RequiredError="First name is required"
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.LastName" 
+                                             Label="Last Name" 
+                                             Required="true"
+                                             RequiredError="Last name is required"
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseTextField @bind-Value="Staff.Email" 
+                                     Label="Email" 
+                                     Required="true"
+                                     RequiredError="Email is required"
+                                     InputType="InputType.Email"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Staff.Phone" 
+                                     Label="Phone" 
+                                     InputType="InputType.Telephone"
+                                     T="string" />
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.EmergencyContactName" 
+                                             Label="Emergency Contact Name" 
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.EmergencyContactPhone" 
+                                             Label="Emergency Contact Phone" 
+                                             InputType="InputType.Telephone"
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Address Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <BaseTextField @bind-Value="Staff.Address.Street" 
+                                     Label="Street Address" 
+                                     T="string" />
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.Address.City" 
+                                             Label="City" 
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.Address.State" 
+                                             Label="State/Province" 
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.Address.PostalCode" 
+                                             Label="Postal Code" 
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.Address.Country" 
+                                             Label="Country" 
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Employment Details</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.JobTitle" 
+                                             Label="Job Title" 
+                                             Required="true"
+                                             RequiredError="Job title is required"
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Staff.Department" 
+                                             Label="Department" 
+                                             Required="true"
+                                             RequiredError="Department is required"
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Staff.Status" 
+                                          Label="Status" 
+                                          Required="true"
+                                          T="StaffStatus">
+                                    @foreach (StaffStatus status in Enum.GetValues<StaffStatus>())
+                                    {
+                                        <MudSelectItem T="StaffStatus" Value="@status">@status.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Staff.EmploymentType" 
+                                          Label="Employment Type" 
+                                          Required="true"
+                                          T="EmploymentType">
+                                    @foreach (EmploymentType type in Enum.GetValues<EmploymentType>())
+                                    {
+                                        <MudSelectItem T="EmploymentType" Value="@type">@type.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudDatePicker @bind-Date="@_hireDate" 
+                                              Label="Hire Date" 
+                                              Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudNumericField @bind-Value="Staff.Salary" 
+                                               Label="Annual Salary" 
+                                               Format="C0"
+                                               Culture="@System.Globalization.CultureInfo.CurrentCulture"
+                                               T="decimal" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudNumericField @bind-Value="Staff.VacationDaysTotal" 
+                                               Label="Total Vacation Days" 
+                                               Min="0"
+                                               Max="50"
+                                               T="int" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudNumericField @bind-Value="Staff.VacationDaysUsed" 
+                                               Label="Vacation Days Used" 
+                                               Min="0"
+                                               T="int" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseTextField @bind-Value="Staff.Notes" 
+                                     Label="Notes" 
+                                     Lines="4"
+                                     T="string" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+    </MudGrid>
+</MudForm>
+
+<MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+    <BaseButton Variant="Variant.Text" 
+               OnClick="@HandleCancel">
+        Cancel
+    </BaseButton>
+    <BaseButton Variant="Variant.Filled" 
+               Color="Color.Primary" 
+               Disabled="@(!_isValid || _saving)"
+               OnClick="@HandleSave">
+        @if (_saving)
+        {
+            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+            <MudText Class="ms-2">Saving...</MudText>
+        }
+        else
+        {
+            <MudText>@(IsEditMode ? "Update" : "Create") Staff Member</MudText>
+        }
+    </BaseButton>
+</MudStack>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+    private bool _saving;
+    private DateTime? _hireDate;
+
+    [Parameter] public Staff Staff { get; set; } = new();
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Staff> OnSave { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _hireDate = Staff.HireDate;
+    }
+
+    private async Task HandleSave()
+    {
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (_isValid)
+            {
+                _saving = true;
+                try
+                {
+                    if (_hireDate.HasValue)
+                        Staff.HireDate = _hireDate.Value;
+
+                    Staff savedStaff;
+                    if (IsEditMode)
+                    {
+                        savedStaff = await StaffService.UpdateStaffAsync(Staff);
+                        Snackbar.Add($"Staff member '{savedStaff.FullName}' updated successfully", Severity.Success);
+                    }
+                    else
+                    {
+                        savedStaff = await StaffService.CreateStaffAsync(Staff);
+                        Snackbar.Add($"Staff member '{savedStaff.FullName}' created successfully", Severity.Success);
+                    }
+                    
+                    await OnSave.InvokeAsync(savedStaff);
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error saving staff member: {ex.Message}", Severity.Error);
+                }
+                finally
+                {
+                    _saving = false;
+                }
+            }
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

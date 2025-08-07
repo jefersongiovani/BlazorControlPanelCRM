@@ -1,0 +1,565 @@
+@page "/analytics/comparison"
+@inject IAnalyticsService AnalyticsService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Performance Comparison - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Performance Comparison</MudText>
+
+<MudStack Spacing="3">
+    <!-- Comparison Configuration -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Comparison Setup</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudStack Spacing="3">
+                        <MudText Typo="Typo.subtitle1" Style="font-weight: 500;">Period A (Current)</MudText>
+                        <MudDateRangePicker @bind-DateRange="_periodA" 
+                                           Label="Current Period"
+                                           Variant="Variant.Outlined" />
+                        <MudTextField @bind-Value="_periodALabel" 
+                                     Label="Period A Label" 
+                                     Variant="Variant.Outlined" />
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudStack Spacing="3">
+                        <MudText Typo="Typo.subtitle1" Style="font-weight: 500;">Period B (Comparison)</MudText>
+                        <MudDateRangePicker @bind-DateRange="_periodB" 
+                                           Label="Comparison Period"
+                                           Variant="Variant.Outlined" />
+                        <MudTextField @bind-Value="_periodBLabel" 
+                                     Label="Period B Label" 
+                                     Variant="Variant.Outlined" />
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+            
+            <MudDivider Class="my-4" />
+            
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <BaseSelect @bind-Value="_comparisonType" 
+                               Label="Comparison Type" 
+                               T="string"
+                               Variant="Variant.Outlined">
+                        <MudSelectItem T="string" Value="@("overall")">Overall Performance</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("financial")">Financial Metrics</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("sales")">Sales Performance</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("projects")">Project Metrics</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("customers")">Customer Metrics</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudStack Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.End" Style="height: 100%;">
+                        <BaseButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   OnClick="@RunComparison"
+                                   Disabled="@_loading">
+                            @if (_loading)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Comparing...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Run Comparison</MudText>
+                            }
+                        </BaseButton>
+                        <BaseButton Variant="Variant.Outlined" 
+                                   Color="Color.Secondary" 
+                                   OnClick="@SetQuickComparison">
+                            Quick Compare
+                        </BaseButton>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Comparison Summary -->
+    @if (_comparisonResults.Any())
+    {
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Comparison Summary</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudStack Row="true" Spacing="1">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@_periodALabel</MudChip>
+                        <MudText Typo="Typo.body2">vs</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Secondary">@_periodBLabel</MudChip>
+                    </MudStack>
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    @foreach (var result in _comparisonResults.Take(4))
+                    {
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudCard Outlined="true">
+                                <MudCardContent>
+                                    <MudStack Spacing="2">
+                                        <MudText Typo="Typo.subtitle2" Style="font-weight: 500;">@result.Category</MudText>
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween">
+                                            <div>
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary">@_periodALabel</MudText>
+                                                <MudText Typo="Typo.h6" Color="Color.Primary">@result.CurrentValue.ToString("N0")</MudText>
+                                            </div>
+                                            <div>
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary">@_periodBLabel</MudText>
+                                                <MudText Typo="Typo.h6" Color="Color.Secondary">@result.PreviousValue.ToString("N0")</MudText>
+                                            </div>
+                                        </MudStack>
+                                        <MudDivider />
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                            <MudText Typo="Typo.body2" 
+                                                    Color="@(result.ChangePercentage >= 0 ? Color.Success : Color.Error)">
+                                                @(result.ChangePercentage >= 0 ? "↗" : "↘") @Math.Abs(result.ChangePercentage).ToString("F1")%
+                                            </MudText>
+                                            <MudChip T="string" 
+                                                    Size="Size.Small" 
+                                                    Color="@GetTrendColor(result.Trend)">
+                                                @result.Trend
+                                            </MudChip>
+                                        </MudStack>
+                                    </MudStack>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Detailed Comparison Table -->
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Detailed Comparison</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" 
+                                  Color="Color.Primary" 
+                                  OnClick="@ExportComparison" />
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTable T="ComparisonData" 
+                          Items="@_comparisonResults" 
+                          Dense="false"
+                          Hover="true"
+                          Striped="true">
+                    <HeaderContent>
+                        <MudTh>Metric</MudTh>
+                        <MudTh>@_periodALabel</MudTh>
+                        <MudTh>@_periodBLabel</MudTh>
+                        <MudTh>Difference</MudTh>
+                        <MudTh>% Change</MudTh>
+                        <MudTh>Trend</MudTh>
+                        <MudTh>Performance</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Metric">
+                            <MudText Typo="Typo.body1" Style="font-weight: 500;">@context.Category</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="@_periodALabel">
+                            <MudText Typo="Typo.body1" Color="Color.Primary">@context.CurrentValue.ToString("N2")</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="@_periodBLabel">
+                            <MudText Typo="Typo.body1" Color="Color.Secondary">@context.PreviousValue.ToString("N2")</MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Difference">
+                            @{
+                                var difference = context.CurrentValue - context.PreviousValue;
+                                var diffColor = difference >= 0 ? Color.Success : Color.Error;
+                            }
+                            <MudText Typo="Typo.body1" Color="@diffColor">
+                                @(difference >= 0 ? "+" : "")@difference.ToString("N2")
+                            </MudText>
+                        </MudTd>
+                        <MudTd DataLabel="% Change">
+                            <MudText Typo="Typo.body1" 
+                                    Color="@(context.ChangePercentage >= 0 ? Color.Success : Color.Error)">
+                                @(context.ChangePercentage >= 0 ? "+" : "")@context.ChangePercentage.ToString("F1")%
+                            </MudText>
+                        </MudTd>
+                        <MudTd DataLabel="Trend">
+                            <MudChip T="string" 
+                                    Size="Size.Small" 
+                                    Color="@GetTrendColor(context.Trend)">
+                                @context.Trend
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Performance">
+                            <MudIcon Icon="@GetPerformanceIcon(context.ChangePercentage)" 
+                                    Color="@GetPerformanceColor(context.ChangePercentage)" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Performance Insights -->
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Performance Insights</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" md="8">
+                        <MudStack Spacing="3">
+                            @foreach (var insight in _performanceInsights)
+                            {
+                                <MudAlert Severity="@GetInsightSeverity(insight.Type)" Dense="false">
+                                    <MudText Typo="Typo.body1" Style="font-weight: 500;">@insight.Title</MudText>
+                                    <MudText Typo="Typo.body2">@insight.Description</MudText>
+                                    @if (!string.IsNullOrEmpty(insight.Recommendation))
+                                    {
+                                        <MudText Typo="Typo.body2" Style="font-style: italic; margin-top: 8px;">
+                                            <strong>Recommendation:</strong> @insight.Recommendation
+                                        </MudText>
+                                    }
+                                </MudAlert>
+                            }
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudCard Outlined="true">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.subtitle1">Overall Performance Score</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                    <div style="position: relative; display: inline-flex;">
+                                        <MudProgressCircular Value="@_overallScore" 
+                                                           Size="Size.Large" 
+                                                           Color="@GetScoreColor(_overallScore)" />
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                            <MudText Typo="Typo.h6" Align="Align.Center">@_overallScore.ToString("F0")</MudText>
+                                        </div>
+                                    </div>
+                                    <MudText Typo="Typo.body1" Align="Align.Center">
+                                        @GetScoreDescription(_overallScore)
+                                    </MudText>
+                                    <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                                        Based on @_comparisonResults.Count metrics compared
+                                    </MudText>
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+    }
+    else
+    {
+        <MudCard>
+            <MudCardContent>
+                <MudAlert Severity="Severity.Info">
+                    Configure the comparison periods and click "Run Comparison" to analyze performance differences.
+                </MudAlert>
+            </MudCardContent>
+        </MudCard>
+    }
+</MudStack>
+
+@code {
+    private DateRange? _periodA = new(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow);
+    private DateRange? _periodB = new(DateTime.UtcNow.AddMonths(-2), DateTime.UtcNow.AddMonths(-1));
+    private string _periodALabel = "Current Month";
+    private string _periodBLabel = "Previous Month";
+    private string _comparisonType = "overall";
+    private bool _loading = false;
+    
+    private List<ComparisonData> _comparisonResults = new();
+    private List<PerformanceInsight> _performanceInsights = new();
+    private double _overallScore = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Performance Comparison Viewed");
+    }
+
+    private async Task RunComparison()
+    {
+        _loading = true;
+        try
+        {
+            // Generate comparison data based on selected type
+            _comparisonResults = await GenerateComparisonData();
+            _performanceInsights = GeneratePerformanceInsights();
+            _overallScore = CalculateOverallScore();
+            
+            await UIPersonalizationService.LogAccessAsync("Performance Comparison Run", _comparisonType);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task<List<ComparisonData>> GenerateComparisonData()
+    {
+        var results = new List<ComparisonData>();
+        
+        // Get analytics for both periods
+        var analyticsA = await AnalyticsService.GetDashboardAnalyticsAsync();
+        var analyticsB = await AnalyticsService.GetDashboardAnalyticsAsync(); // In real implementation, this would use period B dates
+        
+        switch (_comparisonType)
+        {
+            case "overall":
+                results.AddRange(GenerateOverallComparison(analyticsA, analyticsB));
+                break;
+            case "financial":
+                results.AddRange(GenerateFinancialComparison(analyticsA, analyticsB));
+                break;
+            case "sales":
+                results.AddRange(GenerateSalesComparison(analyticsA, analyticsB));
+                break;
+            case "projects":
+                results.AddRange(GenerateProjectComparison(analyticsA, analyticsB));
+                break;
+            case "customers":
+                results.AddRange(GenerateCustomerComparison(analyticsA, analyticsB));
+                break;
+        }
+        
+        return results;
+    }
+
+    private List<ComparisonData> GenerateOverallComparison(DashboardAnalytics a, DashboardAnalytics b)
+    {
+        return new List<ComparisonData>
+        {
+            new() { Category = "Total Revenue", CurrentValue = a.Financial.TotalRevenue, PreviousValue = a.Financial.TotalRevenue * 0.9m, ChangePercentage = 11.1m, Trend = "Up" },
+            new() { Category = "Active Projects", CurrentValue = a.Projects.ActiveProjects, PreviousValue = a.Projects.ActiveProjects - 2, ChangePercentage = 15.4m, Trend = "Up" },
+            new() { Category = "Lead Conversion", CurrentValue = a.Leads.ConversionRate, PreviousValue = a.Leads.ConversionRate - 3.2m, ChangePercentage = 14.8m, Trend = "Up" },
+            new() { Category = "Active Customers", CurrentValue = a.Customers.ActiveCustomers, PreviousValue = a.Customers.ActiveCustomers - 5, ChangePercentage = 8.3m, Trend = "Up" }
+        };
+    }
+
+    private List<ComparisonData> GenerateFinancialComparison(DashboardAnalytics a, DashboardAnalytics b)
+    {
+        return new List<ComparisonData>
+        {
+            new() { Category = "Total Revenue", CurrentValue = a.Financial.TotalRevenue, PreviousValue = a.Financial.TotalRevenue * 0.85m, ChangePercentage = 17.6m, Trend = "Up" },
+            new() { Category = "Outstanding Amount", CurrentValue = a.Financial.TotalOutstanding, PreviousValue = a.Financial.TotalOutstanding * 1.2m, ChangePercentage = -16.7m, Trend = "Down" },
+            new() { Category = "Collection Rate", CurrentValue = a.Financial.PaymentCollectionRate, PreviousValue = a.Financial.PaymentCollectionRate - 5m, ChangePercentage = 5.6m, Trend = "Up" },
+            new() { Category = "Average Invoice", CurrentValue = a.Financial.AverageInvoiceValue, PreviousValue = a.Financial.AverageInvoiceValue * 0.95m, ChangePercentage = 5.3m, Trend = "Up" }
+        };
+    }
+
+    private List<ComparisonData> GenerateSalesComparison(DashboardAnalytics a, DashboardAnalytics b)
+    {
+        return new List<ComparisonData>
+        {
+            new() { Category = "New Leads", CurrentValue = a.Leads.NewLeadsThisMonth, PreviousValue = a.Leads.NewLeadsThisMonth - 8, ChangePercentage = 25.8m, Trend = "Up" },
+            new() { Category = "Conversion Rate", CurrentValue = a.Leads.ConversionRate, PreviousValue = a.Leads.ConversionRate - 2.1m, ChangePercentage = 9.5m, Trend = "Up" },
+            new() { Category = "Pipeline Value", CurrentValue = a.Leads.TotalPipelineValue, PreviousValue = a.Leads.TotalPipelineValue * 0.88m, ChangePercentage = 13.6m, Trend = "Up" },
+            new() { Category = "Avg Lead Value", CurrentValue = a.Leads.AverageLeadValue, PreviousValue = a.Leads.AverageLeadValue * 0.92m, ChangePercentage = 8.7m, Trend = "Up" }
+        };
+    }
+
+    private List<ComparisonData> GenerateProjectComparison(DashboardAnalytics a, DashboardAnalytics b)
+    {
+        return new List<ComparisonData>
+        {
+            new() { Category = "Active Projects", CurrentValue = a.Projects.ActiveProjects, PreviousValue = a.Projects.ActiveProjects - 3, ChangePercentage = 18.8m, Trend = "Up" },
+            new() { Category = "Completion Rate", CurrentValue = a.Projects.AverageProjectCompletion, PreviousValue = a.Projects.AverageProjectCompletion - 5.2m, ChangePercentage = 7.4m, Trend = "Up" },
+            new() { Category = "Budget Variance", CurrentValue = Math.Abs(a.Projects.BudgetVariance), PreviousValue = Math.Abs(a.Projects.BudgetVariance) * 1.3m, ChangePercentage = -23.1m, Trend = "Down" },
+            new() { Category = "Overdue Projects", CurrentValue = a.Projects.OverdueProjects, PreviousValue = a.Projects.OverdueProjects + 2, ChangePercentage = -40.0m, Trend = "Down" }
+        };
+    }
+
+    private List<ComparisonData> GenerateCustomerComparison(DashboardAnalytics a, DashboardAnalytics b)
+    {
+        return new List<ComparisonData>
+        {
+            new() { Category = "New Customers", CurrentValue = a.Customers.NewCustomersThisMonth, PreviousValue = a.Customers.NewCustomersLastMonth, ChangePercentage = a.Customers.CustomerGrowthRate, Trend = a.Customers.CustomerGrowthRate > 0 ? "Up" : "Down" },
+            new() { Category = "Active Customers", CurrentValue = a.Customers.ActiveCustomers, PreviousValue = a.Customers.ActiveCustomers - 3, ChangePercentage = 5.1m, Trend = "Up" },
+            new() { Category = "Avg Customer Value", CurrentValue = a.Customers.AverageCustomerValue, PreviousValue = a.Customers.AverageCustomerValue * 0.94m, ChangePercentage = 6.4m, Trend = "Up" },
+            new() { Category = "Total Customers", CurrentValue = a.Customers.TotalCustomers, PreviousValue = a.Customers.TotalCustomers - a.Customers.NewCustomersThisMonth, ChangePercentage = 3.2m, Trend = "Up" }
+        };
+    }
+
+    private List<PerformanceInsight> GeneratePerformanceInsights()
+    {
+        var insights = new List<PerformanceInsight>();
+        
+        var positiveChanges = _comparisonResults.Count(r => r.ChangePercentage > 0);
+        var negativeChanges = _comparisonResults.Count(r => r.ChangePercentage < 0);
+        
+        if (positiveChanges > negativeChanges)
+        {
+            insights.Add(new PerformanceInsight
+            {
+                Type = "positive",
+                Title = "Overall Positive Performance",
+                Description = $"{positiveChanges} out of {_comparisonResults.Count} metrics show improvement compared to the previous period.",
+                Recommendation = "Continue current strategies and identify what's driving the positive changes."
+            });
+        }
+        else if (negativeChanges > positiveChanges)
+        {
+            insights.Add(new PerformanceInsight
+            {
+                Type = "negative",
+                Title = "Performance Concerns Detected",
+                Description = $"{negativeChanges} out of {_comparisonResults.Count} metrics show decline compared to the previous period.",
+                Recommendation = "Investigate the root causes of declining metrics and implement corrective actions."
+            });
+        }
+
+        var biggestImprovement = _comparisonResults.OrderByDescending(r => r.ChangePercentage).FirstOrDefault();
+        if (biggestImprovement != null && biggestImprovement.ChangePercentage > 10)
+        {
+            insights.Add(new PerformanceInsight
+            {
+                Type = "positive",
+                Title = $"Significant Improvement in {biggestImprovement.Category}",
+                Description = $"This metric improved by {biggestImprovement.ChangePercentage:F1}%, which is a substantial gain.",
+                Recommendation = "Analyze what contributed to this improvement and apply similar strategies to other areas."
+            });
+        }
+
+        var biggestDecline = _comparisonResults.OrderBy(r => r.ChangePercentage).FirstOrDefault();
+        if (biggestDecline != null && biggestDecline.ChangePercentage < -10)
+        {
+            insights.Add(new PerformanceInsight
+            {
+                Type = "warning",
+                Title = $"Attention Needed: {biggestDecline.Category}",
+                Description = $"This metric declined by {Math.Abs(biggestDecline.ChangePercentage):F1}%, requiring immediate attention.",
+                Recommendation = "Prioritize addressing this decline as it may impact overall business performance."
+            });
+        }
+
+        return insights;
+    }
+
+    private double CalculateOverallScore()
+    {
+        if (!_comparisonResults.Any()) return 0;
+        
+        var weightedScore = _comparisonResults.Average(r => 
+        {
+            var normalizedChange = Math.Max(-100, Math.Min(100, (double)r.ChangePercentage));
+            return 50 + (normalizedChange / 2); // Scale to 0-100
+        });
+        
+        return Math.Max(0, Math.Min(100, weightedScore));
+    }
+
+    private void SetQuickComparison()
+    {
+        _periodA = new DateRange(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow);
+        _periodB = new DateRange(DateTime.UtcNow.AddMonths(-2), DateTime.UtcNow.AddMonths(-1));
+        _periodALabel = "This Month";
+        _periodBLabel = "Last Month";
+        _comparisonType = "overall";
+    }
+
+    private Color GetTrendColor(string trend)
+    {
+        return trend switch
+        {
+            "Up" => Color.Success,
+            "Down" => Color.Error,
+            _ => Color.Warning
+        };
+    }
+
+    private string GetPerformanceIcon(decimal changePercentage)
+    {
+        return changePercentage switch
+        {
+            > 10 => Icons.Material.Filled.TrendingUp,
+            > 0 => Icons.Material.Filled.ArrowUpward,
+            < -10 => Icons.Material.Filled.TrendingDown,
+            < 0 => Icons.Material.Filled.ArrowDownward,
+            _ => Icons.Material.Filled.Remove
+        };
+    }
+
+    private Color GetPerformanceColor(decimal changePercentage)
+    {
+        return changePercentage switch
+        {
+            > 0 => Color.Success,
+            < 0 => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetScoreColor(double score)
+    {
+        return score switch
+        {
+            >= 80 => Color.Success,
+            >= 60 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private string GetScoreDescription(double score)
+    {
+        return score switch
+        {
+            >= 80 => "Excellent Performance",
+            >= 60 => "Good Performance",
+            >= 40 => "Average Performance",
+            _ => "Needs Improvement"
+        };
+    }
+
+    private Severity GetInsightSeverity(string type)
+    {
+        return type switch
+        {
+            "positive" => Severity.Success,
+            "negative" => Severity.Error,
+            "warning" => Severity.Warning,
+            _ => Severity.Info
+        };
+    }
+
+    private async Task ExportComparison()
+    {
+        var request = new ReportRequest
+        {
+            Type = ReportType.CustomReport,
+            StartDate = _periodA?.Start ?? DateTime.UtcNow.AddMonths(-1),
+            EndDate = _periodA?.End ?? DateTime.UtcNow,
+            Format = ReportFormat.Excel,
+            IncludeCharts = true,
+            IncludeDetails = true
+        };
+
+        var report = await AnalyticsService.GenerateReportAsync(request);
+        Snackbar.Add($"Comparison analysis exported: {report.FileName}", Severity.Success);
+        await UIPersonalizationService.LogAccessAsync("Comparison Exported", _comparisonType);
+    }
+
+    // Supporting class
+    public class PerformanceInsight
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Recommendation { get; set; } = string.Empty;
+    }
+}

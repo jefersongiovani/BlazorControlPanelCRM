@@ -1,0 +1,529 @@
+@page "/leads/{id:guid}"
+@inject ILeadService LeadService
+@inject ILeadActivityService LeadActivityService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>@(_lead?.DisplayName ?? "Lead") - Control Painel CRM</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbItems" />
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+else if (_lead == null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">
+        Lead not found.
+    </MudAlert>
+}
+else
+{
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <div>
+            <MudText Typo="Typo.h3" GutterBottom="true">@_lead.DisplayName</MudText>
+            <MudStack Row="true" Spacing="2">
+                <MudChip T="string" Color="@GetStatusColor(_lead.Status)" Size="Size.Medium">
+                    @_lead.Status
+                </MudChip>
+                <MudChip T="string" Color="@GetPriorityColor(_lead.Priority)" Size="Size.Medium">
+                    @_lead.Priority Priority
+                </MudChip>
+                @if (_lead.IsOverdue)
+                {
+                    <MudChip T="string" Color="Color.Error" Size="Size.Medium">
+                        Overdue Follow-up
+                    </MudChip>
+                }
+            </MudStack>
+        </div>
+        <MudStack Row="true" Spacing="2">
+            <BaseButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.Edit"
+                       OnClick="@EditLead">
+                Edit Lead
+            </BaseButton>
+            @if (_lead.Status != LeadStatus.Converted && _lead.Status != LeadStatus.Lost)
+            {
+                <BaseButton Variant="Variant.Filled" 
+                           Color="Color.Success" 
+                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           OnClick="@ConvertLead">
+                    Convert to Customer
+                </BaseButton>
+            }
+            <BaseButton Variant="Variant.Outlined" 
+                       Color="Color.Error" 
+                       StartIcon="@Icons.Material.Filled.Delete"
+                       OnClick="@DeleteLead">
+                Delete
+            </BaseButton>
+        </MudStack>
+    </MudStack>
+
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudStack Spacing="4">
+                <!-- Contact Information -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Contact Information</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.ContactMail" Color="Color.Primary" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Email</MudText>
+                                <MudText Typo="Typo.body1">@_lead.Email</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Phone</MudText>
+                                <MudText Typo="Typo.body1">@(_lead.Phone ?? "Not provided")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Company</MudText>
+                                <MudText Typo="Typo.body1">@(_lead.Company ?? "Individual")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Job Title</MudText>
+                                <MudText Typo="Typo.body1">@(_lead.JobTitle ?? "Not specified")</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Project Information -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Project Information</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.Work" Color="Color.Secondary" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="3">
+                            @if (!string.IsNullOrEmpty(_lead.ProjectDescription))
+                            {
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Project Description</MudText>
+                                    <MudText Typo="Typo.body1">@_lead.ProjectDescription</MudText>
+                                </div>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(_lead.Requirements))
+                            {
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Requirements</MudText>
+                                    <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_lead.Requirements</MudText>
+                                </div>
+                            }
+                            
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Budget</MudText>
+                                    <MudText Typo="Typo.body1">@(_lead.Budget ?? "Not specified")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Timeline</MudText>
+                                    <MudText Typo="Typo.body1">@(_lead.Timeline ?? "Not specified")</MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Notes -->
+                @if (!string.IsNullOrEmpty(_lead.Notes))
+                {
+                    <BaseCard>
+                        <HeaderContent>
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">Notes</MudText>
+                                </CardHeaderContent>
+                                <CardHeaderActions>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Notes" Color="Color.Info" />
+                                </CardHeaderActions>
+                            </MudCardHeader>
+                        </HeaderContent>
+                        <ChildContent>
+                            <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_lead.Notes</MudText>
+                        </ChildContent>
+                    </BaseCard>
+                }
+
+                <!-- Activities Timeline -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Activity Timeline</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudButton Variant="Variant.Text" 
+                                          StartIcon="@Icons.Material.Filled.Add"
+                                          OnClick="@AddActivity">
+                                    Add Activity
+                                </MudButton>
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        @if (_activities.Any())
+                        {
+                            <MudTimeline TimelineOrientation="TimelineOrientation.Vertical">
+                                @foreach (var activity in _activities.Take(10))
+                                {
+                                    <MudTimelineItem Color="@GetActivityColor(activity.Type)" Size="Size.Small">
+                                        <ItemContent>
+                                            <MudStack>
+                                                <MudText Typo="Typo.body1" Style="font-weight: 500;">@activity.Subject</MudText>
+                                                <MudText Typo="Typo.body2">@activity.Description</MudText>
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                                    @activity.ActivityDate.ToString("MMM dd, yyyy HH:mm") - @activity.Type
+                                                </MudText>
+                                            </MudStack>
+                                        </ItemContent>
+                                    </MudTimelineItem>
+                                }
+                            </MudTimeline>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">No activities recorded yet.</MudText>
+                        }
+                    </ChildContent>
+                </BaseCard>
+            </MudStack>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudStack Spacing="4">
+                <!-- Lead Statistics -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Lead Details</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.Analytics" Color="Color.Success" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Estimated Value</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Success">@_lead.EstimatedValue.ToString("C")</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Lead Source</MudText>
+                                <MudText Typo="Typo.body1">@_lead.Source</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Expected Close Date</MudText>
+                                <MudText Typo="Typo.body1">@_lead.ExpectedCloseDate.ToString("MMM dd, yyyy")</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Days Since Created</MudText>
+                                <MudText Typo="Typo.body1">@_lead.DaysSinceCreated days</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Last Contact</MudText>
+                                <MudText Typo="Typo.body1">
+                                    @(_lead.LastContactDate?.ToString("MMM dd, yyyy") ?? "Never") 
+                                    @if (_lead.LastContactDate.HasValue)
+                                    {
+                                        <span class="mud-text-secondary">(@_lead.DaysSinceLastContact days ago)</span>
+                                    }
+                                </MudText>
+                            </div>
+                            @if (_lead.NextFollowUpDate.HasValue)
+                            {
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Next Follow-up</MudText>
+                                    <MudText Typo="Typo.body1" Color="@(_lead.IsOverdue ? Color.Error : Color.Default)">
+                                        @_lead.NextFollowUpDate.Value.ToString("MMM dd, yyyy")
+                                        @if (_lead.IsOverdue)
+                                        {
+                                            <span> (Overdue)</span>
+                                        }
+                                    </MudText>
+                                </div>
+                            }
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Assignment -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Assignment</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="2">
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Assigned To</MudText>
+                                <MudText Typo="Typo.body1">
+                                    @(_lead.AssignedToStaff?.FullName ?? "Unassigned")
+                                </MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Created</MudText>
+                                <MudText Typo="Typo.body2">@_lead.CreatedAt.ToString("MMM dd, yyyy HH:mm")</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Last Updated</MudText>
+                                <MudText Typo="Typo.body2">@_lead.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</MudText>
+                            </div>
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Quick Actions -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Quick Actions</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="2">
+                            <MudButton Variant="Variant.Text" 
+                                      StartIcon="@Icons.Material.Filled.Email" 
+                                      FullWidth="true"
+                                      Href="@($"mailto:{_lead.Email}")">
+                                Send Email
+                            </MudButton>
+                            @if (!string.IsNullOrEmpty(_lead.Phone))
+                            {
+                                <MudButton Variant="Variant.Text" 
+                                          StartIcon="@Icons.Material.Filled.Phone" 
+                                          FullWidth="true"
+                                          Href="@($"tel:{_lead.Phone}")">
+                                    Call Lead
+                                </MudButton>
+                            }
+                            <MudButton Variant="Variant.Text" 
+                                      StartIcon="@Icons.Material.Filled.RequestQuote" 
+                                      FullWidth="true">
+                                Create Estimate
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" 
+                                      StartIcon="@Icons.Material.Filled.Schedule" 
+                                      FullWidth="true"
+                                      OnClick="@ScheduleFollowUp">
+                                Schedule Follow-up
+                            </MudButton>
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    
+    private Lead? _lead;
+    private List<LeadActivity> _activities = new();
+    private bool _loading = true;
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("View Lead Page Viewed", Id.ToString());
+        await LoadLead();
+        await LoadActivities();
+        
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: "/", icon: Icons.Material.Filled.Home),
+            new BreadcrumbItem("Leads", href: "/leads", icon: Icons.Material.Filled.TrendingUp),
+            new BreadcrumbItem(_lead?.DisplayName ?? "Lead", href: null, disabled: true, icon: Icons.Material.Filled.Person)
+        };
+    }
+
+    private async Task LoadLead()
+    {
+        _loading = true;
+        try
+        {
+            _lead = await LeadService.GetLeadByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading lead: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadActivities()
+    {
+        try
+        {
+            _activities = await LeadActivityService.GetActivitiesByLeadAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading activities: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private Color GetStatusColor(LeadStatus status)
+    {
+        return status switch
+        {
+            LeadStatus.New => Color.Info,
+            LeadStatus.Contacted => Color.Primary,
+            LeadStatus.Qualified => Color.Secondary,
+            LeadStatus.Proposal => Color.Warning,
+            LeadStatus.Negotiation => Color.Tertiary,
+            LeadStatus.Converted => Color.Success,
+            LeadStatus.Lost => Color.Error,
+            LeadStatus.Unqualified => Color.Dark,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetPriorityColor(LeadPriority priority)
+    {
+        return priority switch
+        {
+            LeadPriority.Low => Color.Default,
+            LeadPriority.Medium => Color.Info,
+            LeadPriority.High => Color.Warning,
+            LeadPriority.Critical => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetActivityColor(LeadActivityType type)
+    {
+        return type switch
+        {
+            LeadActivityType.Call => Color.Primary,
+            LeadActivityType.Email => Color.Info,
+            LeadActivityType.Meeting => Color.Success,
+            LeadActivityType.Demo => Color.Secondary,
+            LeadActivityType.Proposal => Color.Warning,
+            LeadActivityType.FollowUp => Color.Tertiary,
+            _ => Color.Default
+        };
+    }
+
+    private void EditLead()
+    {
+        Navigation.NavigateTo($"/leads/{Id}/edit");
+    }
+
+    private async Task ConvertLead()
+    {
+        if (_lead == null) return;
+
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Convert lead '{_lead.DisplayName}' to customer? This will create a new customer record and mark the lead as converted.",
+            ["ButtonText"] = "Convert",
+            ["Color"] = Color.Success
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Convert Lead", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                var customer = new Customer
+                {
+                    FirstName = _lead.FirstName,
+                    LastName = _lead.LastName,
+                    Email = _lead.Email,
+                    Phone = _lead.Phone,
+                    Company = _lead.Company,
+                    JobTitle = _lead.JobTitle,
+                    Status = CustomerStatus.Active,
+                    Type = string.IsNullOrEmpty(_lead.Company) ? CustomerType.Individual : CustomerType.Business,
+                    Notes = $"Converted from lead. Original project: {_lead.ProjectDescription}"
+                };
+
+                await LeadService.ConvertLeadToCustomerAsync(_lead.Id, customer);
+                Snackbar.Add($"Lead '{_lead.DisplayName}' converted to customer successfully", Severity.Success);
+                await UIPersonalizationService.LogAccessAsync("Lead Converted", _lead.DisplayName);
+                Navigation.NavigateTo("/customers");
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error converting lead: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteLead()
+    {
+        if (_lead == null) return;
+
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Are you sure you want to delete lead '{_lead.DisplayName}'? This action cannot be undone.",
+            ["ButtonText"] = "Delete",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Delete Lead", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var success = await LeadService.DeleteLeadAsync(_lead.Id);
+            if (success)
+            {
+                Snackbar.Add($"Lead '{_lead.DisplayName}' deleted successfully", Severity.Success);
+                await UIPersonalizationService.LogAccessAsync("Lead Deleted", _lead.DisplayName);
+                Navigation.NavigateTo("/leads");
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete lead", Severity.Error);
+            }
+        }
+    }
+
+    private void AddActivity()
+    {
+        // TODO: Implement add activity dialog
+        Snackbar.Add("Add activity feature coming soon", Severity.Info);
+    }
+
+    private void ScheduleFollowUp()
+    {
+        // TODO: Implement schedule follow-up dialog
+        Snackbar.Add("Schedule follow-up feature coming soon", Severity.Info);
+    }
+}

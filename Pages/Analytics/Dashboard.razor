@@ -1,0 +1,561 @@
+@page "/analytics"
+@page "/analytics/dashboard"
+@inject IAnalyticsService AnalyticsService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<PageTitle>Analytics Dashboard - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Analytics Dashboard</MudText>
+
+<MudStack Spacing="3">
+    <!-- Date Range Selector -->
+    <MudPaper Class="pa-4">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h6">Business Intelligence Overview</MudText>
+            <MudStack Row="true" Spacing="2">
+                <MudDateRangePicker @bind-DateRange="_dateRange" 
+                                   Label="Date Range"
+                                   Variant="Variant.Outlined"
+                                   Size="Size.Small" />
+                <BaseButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           StartIcon="@Icons.Material.Filled.Refresh"
+                           OnClick="@RefreshData">
+                    Refresh
+                </BaseButton>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+
+    <!-- Key Performance Indicators -->
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Total Revenue</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success">@_analytics.Financial.TotalRevenue.ToString("C")</MudText>
+                            <MudText Typo="Typo.caption" Color="@GetTrendColor(_analytics.Financial.RevenueGrowthRate)">
+                                @GetTrendIcon(_analytics.Financial.RevenueGrowthRate) @_analytics.Financial.RevenueGrowthRate.ToString("F1")%
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Active Projects</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">@_analytics.Projects.ActiveProjects</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                @_analytics.Projects.TotalProjects total
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.Work" Color="Color.Primary" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Lead Conversion</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info">@_analytics.Leads.ConversionRate.ToString("F1")%</MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                @_analytics.Leads.ConvertedLeads/@_analytics.Leads.TotalLeads leads
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Info" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Active Customers</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Secondary">@_analytics.Customers.ActiveCustomers</MudText>
+                            <MudText Typo="Typo.caption" Color="@GetTrendColor(_analytics.Customers.CustomerGrowthRate)">
+                                @GetTrendIcon(_analytics.Customers.CustomerGrowthRate) @_analytics.Customers.CustomerGrowthRate.ToString("F1")%
+                            </MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Secondary" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Charts Section -->
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Revenue Trend</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                        @if (_loading)
+                        {
+                            <MudProgressCircular Indeterminate="true" />
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1" Class="mud-text-secondary">
+                                Revenue Chart (Chart component would be integrated here)
+                            </MudText>
+                        }
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Lead Sources</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <div style="height: 300px;">
+                        @if (_loading)
+                        {
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                                <MudProgressCircular Indeterminate="true" />
+                            </div>
+                        }
+                        else
+                        {
+                            <MudStack Spacing="2">
+                                @foreach (var source in _analytics.Leads.LeadsBySource)
+                                {
+                                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                        <MudText Typo="Typo.body1">@source.Key</MudText>
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@source.Value</MudChip>
+                                    </MudStack>
+                                    <MudProgressLinear Value="@GetSourcePercentage(source.Value)" 
+                                                      Color="Color.Primary" 
+                                                      Size="Size.Small" />
+                                }
+                            </MudStack>
+                        }
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Performance Metrics -->
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Performance Metrics</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudStack Spacing="2">
+                                <MudText Typo="Typo.subtitle1">Project Delivery Rate</MudText>
+                                <MudProgressLinear Value="@((double)_analytics.Performance.ProjectDeliveryRate)" 
+                                                  Color="@GetPerformanceColor(_analytics.Performance.ProjectDeliveryRate)" 
+                                                  Size="Size.Medium" />
+                                <MudText Typo="Typo.body2">@_analytics.Performance.ProjectDeliveryRate.ToString("F1")%</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudStack Spacing="2">
+                                <MudText Typo="Typo.subtitle1">Customer Satisfaction</MudText>
+                                <MudProgressLinear Value="@((double)_analytics.Performance.CustomerSatisfactionScore)" 
+                                                  Color="@GetPerformanceColor(_analytics.Performance.CustomerSatisfactionScore)" 
+                                                  Size="Size.Medium" />
+                                <MudText Typo="Typo.body2">@_analytics.Performance.CustomerSatisfactionScore.ToString("F1")%</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudStack Spacing="2">
+                                <MudText Typo="Typo.subtitle1">Resource Utilization</MudText>
+                                <MudProgressLinear Value="@((double)_analytics.Performance.ResourceUtilization)" 
+                                                  Color="@GetPerformanceColor(_analytics.Performance.ResourceUtilization)" 
+                                                  Size="Size.Medium" />
+                                <MudText Typo="Typo.body2">@_analytics.Performance.ResourceUtilization.ToString("F1")%</MudText>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudStack Spacing="2">
+                                <MudText Typo="Typo.subtitle1">Profit Margin</MudText>
+                                <MudProgressLinear Value="@((double)_analytics.Performance.ProfitMargin)" 
+                                                  Color="@GetPerformanceColor(_analytics.Performance.ProfitMargin)" 
+                                                  Size="Size.Medium" />
+                                <MudText Typo="Typo.body2">@_analytics.Performance.ProfitMargin.ToString("F1")%</MudText>
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Quick Actions</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudStack Spacing="2">
+                        <BaseButton Variant="Variant.Outlined" 
+                                   Color="Color.Primary" 
+                                   FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.Assessment"
+                                   OnClick="@(() => Navigation.NavigateTo("/analytics/reports"))">
+                            Generate Reports
+                        </BaseButton>
+                        <BaseButton Variant="Variant.Outlined"
+                                   Color="Color.Secondary"
+                                   FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.TrendingUp"
+                                   OnClick="@(() => Navigation.NavigateTo("/analytics/trends"))">
+                            View Trends
+                        </BaseButton>
+                        <BaseButton Variant="Variant.Outlined"
+                                   Color="Color.Info"
+                                   FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.Compare"
+                                   OnClick="@(() => Navigation.NavigateTo("/analytics/comparison"))">
+                            Compare Periods
+                        </BaseButton>
+                        <BaseButton Variant="Variant.Outlined"
+                                   Color="Color.Warning"
+                                   FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.Insights"
+                                   OnClick="@ShowInsights">
+                            AI Insights
+                        </BaseButton>
+                        <BaseButton Variant="Variant.Outlined" 
+                                   Color="Color.Success" 
+                                   FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.FileDownload"
+                                   OnClick="@ExportDashboard">
+                            Export Dashboard
+                        </BaseButton>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Recent Activity Summary -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Business Summary</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Primary">Financial Health</MudText>
+                        <MudText Typo="Typo.body2">Outstanding: @_analytics.Financial.TotalOutstanding.ToString("C")</MudText>
+                        <MudText Typo="Typo.body2">Collection Rate: @_analytics.Financial.PaymentCollectionRate.ToString("F1")%</MudText>
+                        <MudText Typo="Typo.body2">Avg Invoice: @_analytics.Financial.AverageInvoiceValue.ToString("C")</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Project Status</MudText>
+                        <MudText Typo="Typo.body2">Overdue: @_analytics.Projects.OverdueProjects projects</MudText>
+                        <MudText Typo="Typo.body2">Budget Variance: @_analytics.Projects.BudgetVariance.ToString("C")</MudText>
+                        <MudText Typo="Typo.body2">Avg Completion: @_analytics.Projects.AverageProjectCompletion.ToString("F1")%</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Info">Sales Pipeline</MudText>
+                        <MudText Typo="Typo.body2">Pipeline Value: @_analytics.Leads.TotalPipelineValue.ToString("C")</MudText>
+                        <MudText Typo="Typo.body2">Overdue Follow-ups: @_analytics.Leads.OverdueFollowUps</MudText>
+                        <MudText Typo="Typo.body2">Avg Lead Value: @_analytics.Leads.AverageLeadValue.ToString("C")</MudText>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudStack Spacing="1">
+                        <MudText Typo="Typo.subtitle2" Color="Color.Success">Team Performance</MudText>
+                        <MudText Typo="Typo.body2">Active Staff: @_analytics.Staff.ActiveStaff/@_analytics.Staff.TotalStaff</MudText>
+                        <MudText Typo="Typo.body2">Avg Projects/Staff: @_analytics.Staff.AverageProjectsPerStaff.ToString("F1")</MudText>
+                        <MudText Typo="Typo.body2">Avg Leads/Staff: @_analytics.Staff.AverageLeadsPerStaff.ToString("F1")</MudText>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+    <!-- AI Insights Modal -->
+    <MudDialog @bind-IsVisible="_showInsightsDialog" Options="_dialogOptions">
+        <TitleContent>
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.Psychology" Class="mr-3" /> AI-Powered Business Insights
+            </MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudStack Spacing="3">
+                @foreach (var insight in _aiInsights)
+                {
+                    <MudAlert Severity="@GetInsightSeverity(insight.Priority)" Dense="false">
+                        <MudText Typo="Typo.subtitle1" Style="font-weight: 500;">@insight.Title</MudText>
+                        <MudText Typo="Typo.body2">@insight.Description</MudText>
+                        @if (!string.IsNullOrEmpty(insight.ActionItem))
+                        {
+                            <MudText Typo="Typo.body2" Style="font-style: italic; margin-top: 8px;">
+                                <strong>Recommended Action:</strong> @insight.ActionItem
+                            </MudText>
+                        }
+                        <MudText Typo="Typo.caption" Class="mt-2">
+                            Confidence: @insight.Confidence% | Impact: @insight.Impact
+                        </MudText>
+                    </MudAlert>
+                }
+
+                @if (!_aiInsights.Any())
+                {
+                    <MudAlert Severity="Severity.Info">
+                        <MudText Typo="Typo.body1">Analyzing your business data...</MudText>
+                        <MudProgressLinear Indeterminate="true" Class="mt-2" />
+                    </MudAlert>
+                }
+            </MudStack>
+        </DialogContent>
+        <DialogActions>
+            <BaseButton OnClick="@(() => _showInsightsDialog = false)">Close</BaseButton>
+            <BaseButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@GenerateDetailedReport">
+                Generate Detailed Report
+            </BaseButton>
+        </DialogActions>
+    </MudDialog>
+
+@code {
+    private DashboardAnalytics _analytics = new();
+    private bool _loading = true;
+    private DateRange? _dateRange = new(DateTime.UtcNow.AddMonths(-3), DateTime.UtcNow);
+    private bool _showInsightsDialog = false;
+    private List<AIInsight> _aiInsights = new();
+    private Timer? _refreshTimer;
+
+    private DialogOptions _dialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Analytics Dashboard Viewed");
+        await LoadAnalytics();
+        StartRealTimeUpdates();
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+    }
+
+    private async Task LoadAnalytics()
+    {
+        _loading = true;
+        try
+        {
+            _analytics = await AnalyticsService.GetDashboardAnalyticsAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadAnalytics();
+        await UIPersonalizationService.LogAccessAsync("Analytics Dashboard Refreshed");
+    }
+
+    private Color GetTrendColor(decimal value)
+    {
+        return value >= 0 ? Color.Success : Color.Error;
+    }
+
+    private string GetTrendIcon(decimal value)
+    {
+        return value >= 0 ? "↗" : "↘";
+    }
+
+    private Color GetPerformanceColor(decimal value)
+    {
+        return value switch
+        {
+            >= 90 => Color.Success,
+            >= 70 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private double GetSourcePercentage(int value)
+    {
+        var total = _analytics.Leads.LeadsBySource.Values.Sum();
+        return total > 0 ? ((double)value / total) * 100 : 0;
+    }
+
+    private async Task ExportDashboard()
+    {
+        var request = new ReportRequest
+        {
+            Type = ReportType.ExecutiveSummary,
+            StartDate = _dateRange?.Start ?? DateTime.UtcNow.AddMonths(-3),
+            EndDate = _dateRange?.End ?? DateTime.UtcNow,
+            Format = ReportFormat.PDF,
+            IncludeCharts = true,
+            IncludeDetails = true
+        };
+
+        var report = await AnalyticsService.GenerateReportAsync(request);
+        await UIPersonalizationService.LogAccessAsync("Dashboard Exported", report.FileName);
+        
+        // In a real application, this would trigger a download
+        // For now, we'll just navigate to the reports page
+        Navigation.NavigateTo("/analytics/reports");
+    }
+
+    private void StartRealTimeUpdates()
+    {
+        _refreshTimer = new Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await LoadAnalytics();
+                StateHasChanged();
+            });
+        }, null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+    }
+
+    private async Task ShowInsights()
+    {
+        _showInsightsDialog = true;
+        await GenerateAIInsights();
+    }
+
+    private async Task GenerateAIInsights()
+    {
+        _aiInsights.Clear();
+
+        // Simulate AI analysis - in a real application, this would call an AI service
+        await Task.Delay(1000); // Simulate processing time
+
+        _aiInsights.AddRange(new[]
+        {
+            new AIInsight
+            {
+                Title = "Revenue Growth Opportunity",
+                Description = "Your revenue has grown 15% this month, but customer acquisition cost has increased. Consider optimizing your marketing channels.",
+                ActionItem = "Review marketing spend allocation and focus on highest-converting channels.",
+                Priority = "High",
+                Confidence = 87,
+                Impact = "High"
+            },
+            new AIInsight
+            {
+                Title = "Project Delivery Optimization",
+                Description = "3 projects are at risk of missing deadlines. Resource reallocation could improve delivery rates by 12%.",
+                ActionItem = "Reassign 2 developers from Project Alpha to critical path projects.",
+                Priority = "Medium",
+                Confidence = 92,
+                Impact = "Medium"
+            },
+            new AIInsight
+            {
+                Title = "Customer Retention Alert",
+                Description = "Customer engagement has decreased 8% among enterprise clients. Proactive outreach recommended.",
+                ActionItem = "Schedule check-in calls with top 10 enterprise customers this week.",
+                Priority = "High",
+                Confidence = 78,
+                Impact = "High"
+            },
+            new AIInsight
+            {
+                Title = "Lead Quality Improvement",
+                Description = "Lead conversion rate from social media is 23% higher than email campaigns. Shift budget allocation recommended.",
+                ActionItem = "Increase social media marketing budget by 30% and reduce email campaign spend.",
+                Priority = "Low",
+                Confidence = 85,
+                Impact = "Medium"
+            }
+        });
+
+        StateHasChanged();
+    }
+
+    private async Task GenerateDetailedReport()
+    {
+        var request = new ReportRequest
+        {
+            Type = ReportType.ExecutiveSummary,
+            StartDate = _dateRange?.Start ?? DateTime.UtcNow.AddMonths(-3),
+            EndDate = _dateRange?.End ?? DateTime.UtcNow,
+            Format = ReportFormat.PDF,
+            IncludeCharts = true,
+            IncludeDetails = true
+        };
+
+        var report = await AnalyticsService.GenerateReportAsync(request);
+        Snackbar.Add($"AI Insights report generated: {report.FileName}", Severity.Success);
+        _showInsightsDialog = false;
+    }
+
+    private Severity GetInsightSeverity(string priority)
+    {
+        return priority switch
+        {
+            "High" => Severity.Error,
+            "Medium" => Severity.Warning,
+            "Low" => Severity.Info,
+            _ => Severity.Normal
+        };
+    }
+
+    // Supporting class for AI insights
+    public class AIInsight
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string ActionItem { get; set; } = string.Empty;
+        public string Priority { get; set; } = string.Empty;
+        public int Confidence { get; set; }
+        public string Impact { get; set; } = string.Empty;
+    }
+}

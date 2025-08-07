@@ -1,0 +1,44 @@
+@page "/projects/create"
+@inject NavigationManager Navigation
+@inject IUIPersonalizationService UIPersonalizationService
+
+<PageTitle>Create Project - Control Painel CRM</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbItems" />
+
+<MudText Typo="Typo.h3" GutterBottom="true">Create New Project</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <ProjectForm Project="@_project" 
+                 IsEditMode="false"
+                 OnSave="@OnProjectSaved"
+                 OnCancel="@OnCancel" />
+</MudPaper>
+
+@code {
+    private Project _project = new();
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Create Project Page Viewed");
+        
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: "/", icon: Icons.Material.Filled.Home),
+            new BreadcrumbItem("Projects", href: "/projects", icon: Icons.Material.Filled.Work),
+            new BreadcrumbItem("Create Project", href: null, disabled: true, icon: Icons.Material.Filled.Add)
+        };
+    }
+
+    private async Task OnProjectSaved(Project project)
+    {
+        await UIPersonalizationService.LogAccessAsync("Project Created", project.Name);
+        Navigation.NavigateTo("/projects");
+    }
+
+    private void OnCancel()
+    {
+        Navigation.NavigateTo("/projects");
+    }
+}

@@ -1,0 +1,36 @@
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudDrawer @bind-Open="@Open"
+           Anchor="@Anchor"
+           Elevation="@Elevation"
+           Variant="@Variant"
+           Width="@Width"
+           Height="@Height"
+           ClipMode="@ClipMode"
+           Overlay="@Overlay"
+           DisableOverlay="@DisableOverlay"
+           Breakpoint="@Breakpoint"
+           PreserveOpenState="@PreserveOpenState"
+           Class="@Class"
+           Style="@Style">
+    @ChildContent
+</MudDrawer>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public Anchor Anchor { get; set; } = Anchor.Start;
+    [Parameter] public int Elevation { get; set; } = 1;
+    [Parameter] public DrawerVariant Variant { get; set; } = DrawerVariant.Responsive;
+    [Parameter] public string Width { get; set; } = "240px";
+    [Parameter] public string Height { get; set; } = "100vh";
+    [Parameter] public DrawerClipMode ClipMode { get; set; } = DrawerClipMode.Never;
+    [Parameter] public bool Overlay { get; set; } = true;
+    [Parameter] public bool DisableOverlay { get; set; } = false;
+    [Parameter] public Breakpoint Breakpoint { get; set; } = Breakpoint.Md;
+    [Parameter] public bool PreserveOpenState { get; set; } = false;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

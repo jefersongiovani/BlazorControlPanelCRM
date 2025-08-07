@@ -1,0 +1,287 @@
+@namespace BlazorControlPanel.Components.Leads
+@inject ILeadService LeadService
+@inject IStaffService StaffService
+@inject ISnackbar Snackbar
+
+<MudForm @ref="_form" @bind-IsValid="@_isValid" Model="@Lead">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Contact Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Lead.FirstName" 
+                                             Label="First Name" 
+                                             Required="true"
+                                             RequiredError="First name is required"
+                                             T="string" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseTextField @bind-Value="Lead.LastName" 
+                                             Label="Last Name" 
+                                             Required="true"
+                                             RequiredError="Last name is required"
+                                             T="string" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseTextField @bind-Value="Lead.Email" 
+                                     Label="Email" 
+                                     Required="true"
+                                     RequiredError="Email is required"
+                                     InputType="InputType.Email"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Lead.Phone" 
+                                     Label="Phone" 
+                                     InputType="InputType.Telephone"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Lead.Company" 
+                                     Label="Company" 
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Lead.JobTitle" 
+                                     Label="Job Title" 
+                                     T="string" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Lead Details</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Lead.Status" 
+                                          Label="Status" 
+                                          Required="true"
+                                          T="LeadStatus">
+                                    @foreach (LeadStatus status in Enum.GetValues<LeadStatus>())
+                                    {
+                                        <MudSelectItem T="LeadStatus" Value="@status">@status.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Lead.Priority" 
+                                          Label="Priority" 
+                                          Required="true"
+                                          T="LeadPriority">
+                                    @foreach (LeadPriority priority in Enum.GetValues<LeadPriority>())
+                                    {
+                                        <MudSelectItem T="LeadPriority" Value="@priority">@priority.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Lead.Source" 
+                                          Label="Lead Source" 
+                                          Required="true"
+                                          T="LeadSource">
+                                    @foreach (LeadSource source in Enum.GetValues<LeadSource>())
+                                    {
+                                        <MudSelectItem T="LeadSource" Value="@source">@source.ToString()</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Lead.AssignedToStaffId" 
+                                          Label="Assigned To" 
+                                          Clearable="true"
+                                          T="Guid?">
+                                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">Unassigned</MudSelectItem>
+                                    @foreach (var staff in _staffMembers)
+                                    {
+                                        <MudSelectItem T="Guid?" Value="@staff.Id">@staff.FullName</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudNumericField @bind-Value="Lead.EstimatedValue" 
+                                               Label="Estimated Value" 
+                                               Format="C0"
+                                               Culture="@System.Globalization.CultureInfo.CurrentCulture"
+                                               T="decimal" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudDatePicker @bind-Date="@_expectedCloseDate" 
+                                              Label="Expected Close Date" />
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <MudDatePicker @bind-Date="@_nextFollowUpDate" 
+                                      Label="Next Follow-up Date" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <BaseCard>
+                <HeaderContent>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">Project Information</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                </HeaderContent>
+                <ChildContent>
+                    <MudStack Spacing="3">
+                        <BaseTextField @bind-Value="Lead.ProjectDescription" 
+                                     Label="Project Description" 
+                                     Lines="3"
+                                     T="string" />
+                        
+                        <BaseTextField @bind-Value="Lead.Requirements" 
+                                     Label="Requirements" 
+                                     Lines="3"
+                                     T="string" />
+                        
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Lead.Budget" 
+                                          Label="Budget Range" 
+                                          T="string">
+                                    <MudSelectItem T="string" Value="@string.Empty">Select budget range</MudSelectItem>
+                                    @foreach (var budget in LeadDefaults.CommonBudgetRanges)
+                                    {
+                                        <MudSelectItem T="string" Value="@budget">@budget</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <BaseSelect @bind-Value="Lead.Timeline" 
+                                          Label="Timeline" 
+                                          T="string">
+                                    <MudSelectItem T="string" Value="@string.Empty">Select timeline</MudSelectItem>
+                                    @foreach (var timeline in LeadDefaults.CommonTimelines)
+                                    {
+                                        <MudSelectItem T="string" Value="@timeline">@timeline</MudSelectItem>
+                                    }
+                                </BaseSelect>
+                            </MudItem>
+                        </MudGrid>
+                        
+                        <BaseTextField @bind-Value="Lead.Notes" 
+                                     Label="Notes" 
+                                     Lines="4"
+                                     T="string" />
+                    </MudStack>
+                </ChildContent>
+            </BaseCard>
+        </MudItem>
+    </MudGrid>
+</MudForm>
+
+<MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-4">
+    <BaseButton Variant="Variant.Text" 
+               OnClick="@HandleCancel">
+        Cancel
+    </BaseButton>
+    <BaseButton Variant="Variant.Filled" 
+               Color="Color.Primary" 
+               Disabled="@(!_isValid || _saving)"
+               OnClick="@HandleSave">
+        @if (_saving)
+        {
+            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+            <MudText Class="ms-2">Saving...</MudText>
+        }
+        else
+        {
+            <MudText>@(IsEditMode ? "Update" : "Create") Lead</MudText>
+        }
+    </BaseButton>
+</MudStack>
+
+@code {
+    private MudForm? _form;
+    private bool _isValid;
+    private bool _saving;
+    private DateTime? _expectedCloseDate;
+    private DateTime? _nextFollowUpDate;
+    private List<Staff> _staffMembers = new();
+
+    [Parameter] public Lead Lead { get; set; } = new();
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback<Lead> OnSave { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _expectedCloseDate = Lead.ExpectedCloseDate;
+        _nextFollowUpDate = Lead.NextFollowUpDate;
+        _staffMembers = await StaffService.GetAllStaffAsync();
+    }
+
+    private async Task HandleSave()
+    {
+        if (_form != null)
+        {
+            await _form.Validate();
+            if (_isValid)
+            {
+                _saving = true;
+                try
+                {
+                    if (_expectedCloseDate.HasValue)
+                        Lead.ExpectedCloseDate = _expectedCloseDate.Value;
+                        
+                    if (_nextFollowUpDate.HasValue)
+                        Lead.NextFollowUpDate = _nextFollowUpDate.Value;
+
+                    Lead savedLead;
+                    if (IsEditMode)
+                    {
+                        savedLead = await LeadService.UpdateLeadAsync(Lead);
+                        Snackbar.Add($"Lead '{savedLead.DisplayName}' updated successfully", Severity.Success);
+                    }
+                    else
+                    {
+                        savedLead = await LeadService.CreateLeadAsync(Lead);
+                        Snackbar.Add($"Lead '{savedLead.DisplayName}' created successfully", Severity.Success);
+                    }
+                    
+                    await OnSave.InvokeAsync(savedLead);
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Error saving lead: {ex.Message}", Severity.Error);
+                }
+                finally
+                {
+                    _saving = false;
+                }
+            }
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}

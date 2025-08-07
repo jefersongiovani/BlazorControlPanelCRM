@@ -1,0 +1,414 @@
+@page "/leads"
+@inject ILeadService LeadService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Leads - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Lead Management</MudText>
+
+<MudPaper Class="pa-4 ma-2">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudTextField @bind-Value="_searchString" 
+                     Placeholder="Search leads..." 
+                     Adornment="Adornment.Start" 
+                     AdornmentIcon="@Icons.Material.Filled.Search"
+                     IconSize="Size.Medium"
+                     Class="mt-0"
+                     Immediate="true"
+                     DebounceInterval="300"
+                     OnDebounceIntervalElapsed="@OnSearch" />
+        
+        <MudStack Row="true" Spacing="2">
+            <BaseSelect @bind-Value="_selectedStatus" 
+                       Label="Status Filter" 
+                       Clearable="true"
+                       T="LeadStatus?"
+                       Class="min-width-150">
+                <MudSelectItem T="LeadStatus?" Value="@((LeadStatus?)null)">All Statuses</MudSelectItem>
+                @foreach (LeadStatus status in Enum.GetValues<LeadStatus>())
+                {
+                    <MudSelectItem T="LeadStatus?" Value="@status">@status.ToString()</MudSelectItem>
+                }
+            </BaseSelect>
+            
+            <BaseSelect @bind-Value="_selectedPriority" 
+                       Label="Priority Filter" 
+                       Clearable="true"
+                       T="LeadPriority?"
+                       Class="min-width-150">
+                <MudSelectItem T="LeadPriority?" Value="@((LeadPriority?)null)">All Priorities</MudSelectItem>
+                @foreach (LeadPriority priority in Enum.GetValues<LeadPriority>())
+                {
+                    <MudSelectItem T="LeadPriority?" Value="@priority">@priority.ToString()</MudSelectItem>
+                }
+            </BaseSelect>
+            
+            <BaseButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@CreateLead">
+                Add Lead
+            </BaseButton>
+        </MudStack>
+    </MudStack>
+
+    <!-- Statistics Cards -->
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Total Pipeline</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Primary">@_statistics.TotalPipelineValue.ToString("C")</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Primary" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Conversion Rate</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Success">@_statistics.ConversionRate.ToString("F1")%</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Overdue Follow-ups</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Warning">@_statistics.OverdueFollowUps</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Warning" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">Total Leads</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Info">@_statistics.TotalLeads</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Info" Size="Size.Large" />
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudTable T="Lead" 
+              Items="@_filteredLeads" 
+              Loading="@_loading"
+              Dense="false"
+              Hover="true"
+              Striped="true"
+              Bordered="true"
+              FixedHeader="true"
+              Height="600px">
+        
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Lead List</MudText>
+            <MudSpacer />
+            <MudText Typo="Typo.body2">@_filteredLeads.Count() leads found</MudText>
+        </ToolBarContent>
+        
+        <HeaderContent>
+            <MudTh>Lead</MudTh>
+            <MudTh>Company</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Priority</MudTh>
+            <MudTh>Source</MudTh>
+            <MudTh>Value</MudTh>
+            <MudTh>Expected Close</MudTh>
+            <MudTh>Assigned To</MudTh>
+            <MudTh>Next Follow-up</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        
+        <RowTemplate>
+            <MudTd DataLabel="Lead">
+                <div>
+                    <MudText Typo="Typo.body1">@context.FullName</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.Email</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.Phone</MudText>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Company">
+                <div>
+                    <MudText Typo="Typo.body1">@context.Company</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.JobTitle</MudText>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">
+                    @context.Status
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Priority">
+                <MudChip T="string" Color="@GetPriorityColor(context.Priority)" Size="Size.Small">
+                    @context.Priority
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Source">@context.Source</MudTd>
+            <MudTd DataLabel="Value">
+                <MudText Typo="Typo.body1" Style="font-weight: 500;">@context.EstimatedValue.ToString("C")</MudText>
+            </MudTd>
+            <MudTd DataLabel="Expected Close">
+                <MudText Typo="Typo.body2">@context.ExpectedCloseDate.ToString("MMM dd, yyyy")</MudText>
+            </MudTd>
+            <MudTd DataLabel="Assigned To">
+                @if (context.AssignedToStaff != null)
+                {
+                    <MudText Typo="Typo.body2">@context.AssignedToStaff.FullName</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Unassigned</MudText>
+                }
+            </MudTd>
+            <MudTd DataLabel="Next Follow-up">
+                @if (context.NextFollowUpDate.HasValue)
+                {
+                    <MudText Typo="Typo.body2" Color="@(context.IsOverdue ? Color.Error : Color.Default)">
+                        @context.NextFollowUpDate.Value.ToString("MMM dd, yyyy")
+                    </MudText>
+                    @if (context.IsOverdue)
+                    {
+                        <MudChip T="string" Color="Color.Error" Size="Size.Small" Class="mt-1">
+                            Overdue
+                        </MudChip>
+                    }
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Not scheduled</MudText>
+                }
+            </MudTd>
+            <MudTd DataLabel="Actions">
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" 
+                                  Color="Color.Primary" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => ViewLead(context.Id))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                  Color="Color.Secondary" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => EditLead(context.Id))" />
+                    @if (context.Status != LeadStatus.Converted && context.Status != LeadStatus.Lost)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.PersonAdd" 
+                                      Color="Color.Success" 
+                                      Size="Size.Small"
+                                      OnClick="@(() => ConvertLead(context))" />
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                  Color="Color.Error" 
+                                  Size="Size.Small"
+                                  OnClick="@(() => DeleteLead(context))" />
+                </MudStack>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+@code {
+    private List<Lead> _leads = new();
+    private IEnumerable<Lead> _filteredLeads = new List<Lead>();
+    private LeadStatistics _statistics = new();
+    private bool _loading = true;
+    private string _searchString = string.Empty;
+    private LeadStatus? _selectedStatus;
+    private LeadPriority? _selectedPriority;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Lead List Viewed");
+        await LoadLeads();
+        await LoadStatistics();
+    }
+
+    private async Task LoadLeads()
+    {
+        _loading = true;
+        try
+        {
+            _leads = await LeadService.GetAllLeadsAsync();
+            FilterLeads();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadStatistics()
+    {
+        _statistics = await LeadService.GetLeadStatisticsAsync();
+    }
+
+    private void FilterLeads()
+    {
+        var filtered = _leads.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            var searchTerm = _searchString.ToLower();
+            filtered = filtered.Where(l => 
+                l.FirstName.ToLower().Contains(searchTerm) ||
+                l.LastName.ToLower().Contains(searchTerm) ||
+                l.Email.ToLower().Contains(searchTerm) ||
+                l.Company.ToLower().Contains(searchTerm) ||
+                l.Phone.Contains(searchTerm) ||
+                l.ProjectDescription.ToLower().Contains(searchTerm));
+        }
+
+        if (_selectedStatus.HasValue)
+        {
+            filtered = filtered.Where(l => l.Status == _selectedStatus.Value);
+        }
+
+        if (_selectedPriority.HasValue)
+        {
+            filtered = filtered.Where(l => l.Priority == _selectedPriority.Value);
+        }
+
+        _filteredLeads = filtered.ToList();
+        StateHasChanged();
+    }
+
+    private async Task OnSearch(string searchTerm)
+    {
+        _searchString = searchTerm;
+        FilterLeads();
+    }
+
+    private Color GetStatusColor(LeadStatus status)
+    {
+        return status switch
+        {
+            LeadStatus.New => Color.Info,
+            LeadStatus.Contacted => Color.Primary,
+            LeadStatus.Qualified => Color.Secondary,
+            LeadStatus.Proposal => Color.Warning,
+            LeadStatus.Negotiation => Color.Tertiary,
+            LeadStatus.Converted => Color.Success,
+            LeadStatus.Lost => Color.Error,
+            LeadStatus.Unqualified => Color.Dark,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetPriorityColor(LeadPriority priority)
+    {
+        return priority switch
+        {
+            LeadPriority.Low => Color.Default,
+            LeadPriority.Medium => Color.Info,
+            LeadPriority.High => Color.Warning,
+            LeadPriority.Critical => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private void CreateLead()
+    {
+        Navigation.NavigateTo("/leads/create");
+    }
+
+    private void ViewLead(Guid id)
+    {
+        Navigation.NavigateTo($"/leads/{id}");
+    }
+
+    private void EditLead(Guid id)
+    {
+        Navigation.NavigateTo($"/leads/{id}/edit");
+    }
+
+    private async Task ConvertLead(Lead lead)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Convert lead '{lead.DisplayName}' to customer? This will create a new customer record and mark the lead as converted.",
+            ["ButtonText"] = "Convert",
+            ["Color"] = Color.Success
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Convert Lead", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                var customer = new Customer
+                {
+                    FirstName = lead.FirstName,
+                    LastName = lead.LastName,
+                    Email = lead.Email,
+                    Phone = lead.Phone,
+                    Company = lead.Company,
+                    JobTitle = lead.JobTitle,
+                    Status = CustomerStatus.Active,
+                    Type = string.IsNullOrEmpty(lead.Company) ? CustomerType.Individual : CustomerType.Business,
+                    Notes = $"Converted from lead. Original project: {lead.ProjectDescription}"
+                };
+
+                await LeadService.ConvertLeadToCustomerAsync(lead.Id, customer);
+                Snackbar.Add($"Lead '{lead.DisplayName}' converted to customer successfully", Severity.Success);
+                await LoadLeads();
+                await LoadStatistics();
+                await UIPersonalizationService.LogAccessAsync("Lead Converted", lead.DisplayName);
+                Navigation.NavigateTo("/customers");
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error converting lead: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task DeleteLead(Lead lead)
+    {
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Are you sure you want to delete lead '{lead.DisplayName}'? This action cannot be undone.",
+            ["ButtonText"] = "Delete",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Delete Lead", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var success = await LeadService.DeleteLeadAsync(lead.Id);
+            if (success)
+            {
+                Snackbar.Add($"Lead '{lead.DisplayName}' deleted successfully", Severity.Success);
+                await LoadLeads();
+                await LoadStatistics();
+                await UIPersonalizationService.LogAccessAsync("Lead Deleted", lead.DisplayName);
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete lead", Severity.Error);
+            }
+        }
+    }
+}

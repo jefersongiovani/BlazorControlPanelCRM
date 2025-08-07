@@ -1,0 +1,57 @@
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudCard Elevation="@Elevation"
+         Square="@Square"
+         Outlined="@Outlined"
+         Class="@Class"
+         Style="@Style">
+    
+    @if (HeaderContent != null)
+    {
+        <MudCardHeader>
+            @HeaderContent
+        </MudCardHeader>
+    }
+    
+    @if (!string.IsNullOrEmpty(MediaImage))
+    {
+        <MudCardMedia Image="@MediaImage"
+                      Height="@MediaHeight"
+                      Class="@MediaClass" />
+    }
+    
+    @if (ChildContent != null)
+    {
+        <MudCardContent Class="@ContentClass">
+            @ChildContent
+        </MudCardContent>
+    }
+    
+    @if (ActionsContent != null)
+    {
+        <MudCardActions Class="@ActionsClass">
+            @ActionsContent
+        </MudCardActions>
+    }
+</MudCard>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+
+    [Parameter] public RenderFragment? ActionsContent { get; set; }
+    
+    [Parameter] public int Elevation { get; set; } = 1;
+    [Parameter] public bool Square { get; set; } = false;
+    [Parameter] public bool Outlined { get; set; } = false;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    
+    [Parameter] public string? MediaImage { get; set; }
+    [Parameter] public int MediaHeight { get; set; } = 200;
+    [Parameter] public string? MediaClass { get; set; }
+    
+    [Parameter] public string? ContentClass { get; set; }
+    [Parameter] public string? ActionsClass { get; set; }
+}

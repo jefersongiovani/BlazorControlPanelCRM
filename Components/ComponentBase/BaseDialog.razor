@@ -1,0 +1,66 @@
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudDialog Options="@DialogOptions"
+           Class="@Class"
+           Style="@Style">
+    <TitleContent>
+        @if (TitleContent != null)
+        {
+            @TitleContent
+        }
+        else if (!string.IsNullOrEmpty(Title))
+        {
+            <MudText Typo="Typo.h6">@Title</MudText>
+        }
+    </TitleContent>
+    
+    <DialogContent>
+        @ChildContent
+    </DialogContent>
+    
+    <DialogActions>
+        @if (ActionsContent != null)
+        {
+            @ActionsContent
+        }
+        else
+        {
+            <MudButton OnClick="@HandleCancel" Variant="Variant.Text">@CancelText</MudButton>
+            <MudButton OnClick="@HandleConfirm" Variant="Variant.Filled" Color="Color.Primary">@ConfirmText</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? TitleContent { get; set; }
+    [Parameter] public RenderFragment? ActionsContent { get; set; }
+    
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public string ConfirmText { get; set; } = "OK";
+    
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    
+    [Parameter] public DialogOptions? DialogOptions { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+
+    private async Task HandleCancel()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(IsVisible);
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task HandleConfirm()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(IsVisible);
+        await OnConfirm.InvokeAsync();
+    }
+}

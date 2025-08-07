@@ -1,0 +1,82 @@
+@page "/customers/{id:guid}/edit"
+@inject ICustomerService CustomerService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<PageTitle>Edit Customer - Control Painel CRM</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbItems" />
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+else if (_customer == null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">
+        Customer not found.
+    </MudAlert>
+}
+else
+{
+    <MudText Typo="Typo.h3" GutterBottom="true">Edit Customer</MudText>
+    <MudText Typo="Typo.body1" Class="mb-4">Update customer information for @_customer.DisplayName</MudText>
+
+    <MudPaper Class="pa-4 ma-2">
+        <CustomerForm Customer="@_customer" 
+                      IsEditMode="true"
+                      OnSave="@OnCustomerSaved"
+                      OnCancel="@OnCancel" />
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    
+    private Customer? _customer;
+    private bool _loading = true;
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Edit Customer Page Viewed", Id.ToString());
+        await LoadCustomer();
+        
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: "/", icon: Icons.Material.Filled.Home),
+            new BreadcrumbItem("Customers", href: "/customers", icon: Icons.Material.Filled.People),
+            new BreadcrumbItem(_customer?.DisplayName ?? "Customer", href: $"/customers/{Id}", icon: Icons.Material.Filled.Person),
+            new BreadcrumbItem("Edit", href: null, disabled: true, icon: Icons.Material.Filled.Edit)
+        };
+    }
+
+    private async Task LoadCustomer()
+    {
+        _loading = true;
+        try
+        {
+            _customer = await CustomerService.GetCustomerByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading customer: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnCustomerSaved(Customer customer)
+    {
+        await UIPersonalizationService.LogAccessAsync("Customer Updated", customer.DisplayName);
+        Navigation.NavigateTo($"/customers/{customer.Id}");
+    }
+
+    private void OnCancel()
+    {
+        Navigation.NavigateTo($"/customers/{Id}");
+    }
+}

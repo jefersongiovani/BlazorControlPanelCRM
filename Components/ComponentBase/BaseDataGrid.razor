@@ -1,0 +1,127 @@
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+@typeparam T
+
+<MudDataGrid @ref="dataGrid"
+             T="T"
+             Items="@Items"
+             SortMode="@SortMode"
+             Filterable="@Filterable"
+             FilterMode="@FilterMode"
+             FilterCaseSensitivity="@FilterCaseSensitivity"
+             QuickFilter="@QuickFilter"
+             Hideable="@Hideable"
+             ShowColumnOptions="@ShowColumnOptions"
+             ColumnResizeMode="@ColumnResizeMode"
+             Striped="@Striped"
+             Bordered="@Bordered"
+             Dense="@Dense"
+             Hover="@Hover"
+             ReadOnly="@ReadOnly"
+             EditMode="@EditMode"
+             EditTrigger="@EditTrigger"
+             CommittedItemChanges="@CommittedItemChanges"
+             StartedEditingItem="@StartedEditingItem"
+             CanceledEditingItem="@CanceledEditingItem"
+             SelectedItemsChanged="@SelectedItemsChanged"
+             SelectedItems="@SelectedItems"
+             MultiSelection="@MultiSelection"
+             SelectOnRowClick="@SelectOnRowClick"
+             Virtualize="@Virtualize"
+             FixedHeader="@FixedHeader"
+             FixedFooter="@FixedFooter"
+             Height="@Height"
+             Loading="@Loading"
+             LoadingProgressColor="@LoadingProgressColor"
+             Class="@Class"
+             Style="@Style">
+    
+    <ToolBarContent>
+        @ToolBarContent
+    </ToolBarContent>
+    
+    <Columns>
+        @Columns
+    </Columns>
+    
+    <PagerContent>
+        @if (PagerContent != null)
+        {
+            @PagerContent
+        }
+        else
+        {
+            <MudDataGridPager T="T" />
+        }
+    </PagerContent>
+    
+    <NoRecordsContent>
+        @if (NoRecordsContent != null)
+        {
+            @NoRecordsContent
+        }
+        else
+        {
+            <MudText>No records found</MudText>
+        }
+    </NoRecordsContent>
+    
+    <LoadingContent>
+        @if (LoadingContent != null)
+        {
+            @LoadingContent
+        }
+        else
+        {
+            <MudText>Loading...</MudText>
+        }
+    </LoadingContent>
+</MudDataGrid>
+
+@code {
+    private MudDataGrid<T>? dataGrid;
+
+    [Parameter] public IEnumerable<T>? Items { get; set; }
+    [Parameter] public SortMode SortMode { get; set; } = SortMode.Multiple;
+    [Parameter] public bool Filterable { get; set; } = true;
+    [Parameter] public DataGridFilterMode FilterMode { get; set; } = DataGridFilterMode.Simple;
+    [Parameter] public DataGridFilterCaseSensitivity FilterCaseSensitivity { get; set; } = DataGridFilterCaseSensitivity.Default;
+    [Parameter] public Func<T, bool>? QuickFilter { get; set; }
+    [Parameter] public bool Hideable { get; set; } = true;
+    [Parameter] public bool ShowColumnOptions { get; set; } = true;
+    [Parameter] public ResizeMode ColumnResizeMode { get; set; } = ResizeMode.None;
+    [Parameter] public bool Striped { get; set; } = true;
+    [Parameter] public bool Bordered { get; set; } = true;
+    [Parameter] public bool Dense { get; set; } = false;
+    [Parameter] public bool Hover { get; set; } = true;
+    [Parameter] public bool ReadOnly { get; set; } = false;
+    [Parameter] public DataGridEditMode EditMode { get; set; } = DataGridEditMode.Form;
+    [Parameter] public DataGridEditTrigger EditTrigger { get; set; } = DataGridEditTrigger.Manual;
+    [Parameter] public EventCallback<T> CommittedItemChanges { get; set; }
+    [Parameter] public EventCallback<T> StartedEditingItem { get; set; }
+    [Parameter] public EventCallback<T> CanceledEditingItem { get; set; }
+    [Parameter] public EventCallback<HashSet<T>> SelectedItemsChanged { get; set; }
+    [Parameter] public HashSet<T> SelectedItems { get; set; } = new();
+    [Parameter] public bool MultiSelection { get; set; } = false;
+    [Parameter] public bool SelectOnRowClick { get; set; } = true;
+    [Parameter] public bool Virtualize { get; set; } = false;
+    [Parameter] public bool FixedHeader { get; set; } = false;
+    [Parameter] public bool FixedFooter { get; set; } = false;
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public bool Loading { get; set; } = false;
+    [Parameter] public Color LoadingProgressColor { get; set; } = Color.Info;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    
+    [Parameter] public RenderFragment? ToolBarContent { get; set; }
+    [Parameter] public RenderFragment? Columns { get; set; }
+    [Parameter] public RenderFragment? PagerContent { get; set; }
+    [Parameter] public RenderFragment? NoRecordsContent { get; set; }
+    [Parameter] public RenderFragment? LoadingContent { get; set; }
+
+    public async Task ReloadServerData()
+    {
+        if (dataGrid != null)
+            await dataGrid.ReloadServerData();
+    }
+}

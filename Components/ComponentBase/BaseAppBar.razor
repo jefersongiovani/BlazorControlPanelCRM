@@ -1,0 +1,23 @@
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudAppBar Elevation="@Elevation"
+           Dense="@Dense"
+           DisableGutters="@DisableGutters"
+           Color="@Color"
+           Fixed="@Fixed"
+           Class="@Class"
+           Style="@Style">
+    @ChildContent
+</MudAppBar>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public int Elevation { get; set; } = 4;
+    [Parameter] public bool Dense { get; set; } = false;
+    [Parameter] public bool DisableGutters { get; set; } = false;
+    [Parameter] public Color Color { get; set; } = Color.Primary;
+    [Parameter] public bool Fixed { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

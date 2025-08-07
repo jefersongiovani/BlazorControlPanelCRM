@@ -1,0 +1,374 @@
+@page "/settings"
+@inject IUIPersonalizationService UIPersonalizationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Settings - Control Painel CRM</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">System Settings</MudText>
+
+<MudStack Spacing="3">
+    <!-- General Settings -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">General Settings</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.CompanyName" 
+                                  Label="Company Name" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.CompanyEmail" 
+                                  Label="Company Email" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.CompanyPhone" 
+                                  Label="Company Phone" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.CompanyWebsite" 
+                                  Label="Company Website" />
+                </MudItem>
+                <MudItem xs="12">
+                    <BaseTextField @bind-Value="_settings.CompanyAddress" 
+                                  Label="Company Address" 
+                                  Lines="3" />
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- UI Preferences -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">User Interface</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <BaseSelect @bind-Value="_settings.DefaultTheme" 
+                               Label="Default Theme" 
+                               T="string">
+                        <MudSelectItem T="string" Value="@("light")">Light Theme</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("dark")">Dark Theme</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("system")">System Default</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseSelect @bind-Value="_settings.DefaultLanguage" 
+                               Label="Default Language" 
+                               T="string">
+                        <MudSelectItem T="string" Value="@("en")">English</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("pt")">Português</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("es")">Español</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseSelect @bind-Value="_settings.DateFormat" 
+                               Label="Date Format" 
+                               T="string">
+                        <MudSelectItem T="string" Value="@("MM/dd/yyyy")">MM/dd/yyyy</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("dd/MM/yyyy")">dd/MM/yyyy</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("yyyy-MM-dd")">yyyy-MM-dd</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseSelect @bind-Value="_settings.Currency" 
+                               Label="Default Currency" 
+                               T="string">
+                        <MudSelectItem T="string" Value="@("USD")">USD ($)</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("BRL")">BRL (R$)</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("EUR")">EUR (€)</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Business Settings -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Business Configuration</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.DefaultTaxRate" 
+                                  Label="Default Tax Rate (%)" 
+                                  InputType="InputType.Number" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseSelect @bind-Value="_settings.FiscalYearStart" 
+                               Label="Fiscal Year Start" 
+                               T="string">
+                        <MudSelectItem T="string" Value="@("January")">January</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("April")">April</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("July")">July</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("October")">October</MudSelectItem>
+                    </BaseSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.InvoicePrefix" 
+                                  Label="Invoice Number Prefix" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.EstimatePrefix" 
+                                  Label="Estimate Number Prefix" />
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Notification Settings -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Notifications</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudStack Spacing="3">
+                <MudCheckBox @bind-Checked="_settings.EmailNotifications" 
+                            Label="Enable Email Notifications" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.ProjectDeadlineAlerts" 
+                            Label="Project Deadline Alerts" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.InvoiceOverdueAlerts" 
+                            Label="Invoice Overdue Alerts" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.LeadFollowupReminders" 
+                            Label="Lead Follow-up Reminders" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.SystemMaintenanceAlerts" 
+                            Label="System Maintenance Alerts" 
+                            T="bool" />
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Security Settings -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Security & Privacy</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.SessionTimeout" 
+                                  Label="Session Timeout (minutes)" 
+                                  InputType="InputType.Number" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.PasswordMinLength" 
+                                  Label="Minimum Password Length" 
+                                  InputType="InputType.Number" />
+                </MudItem>
+            </MudGrid>
+            <MudStack Spacing="3" Class="mt-3">
+                <MudCheckBox @bind-Checked="_settings.RequirePasswordComplexity" 
+                            Label="Require Password Complexity" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.EnableTwoFactorAuth" 
+                            Label="Enable Two-Factor Authentication" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.LogUserActivity" 
+                            Label="Log User Activity" 
+                            T="bool" />
+                <MudCheckBox @bind-Checked="_settings.EnableDataBackup" 
+                            Label="Enable Automatic Data Backup" 
+                            T="bool" />
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Integration Settings -->
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Integrations</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.EmailProvider" 
+                                  Label="Email Provider" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.PaymentGateway" 
+                                  Label="Payment Gateway" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.CloudStorageProvider" 
+                                  Label="Cloud Storage Provider" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <BaseTextField @bind-Value="_settings.AnalyticsProvider" 
+                                  Label="Analytics Provider" />
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+
+    <!-- Action Buttons -->
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Row="true" Spacing="2">
+                    <BaseButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               OnClick="@SaveSettings"
+                               Disabled="@_saving">
+                        @if (_saving)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                            <MudText Class="ms-2">Saving...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Save Settings</MudText>
+                        }
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Outlined" 
+                               Color="Color.Secondary" 
+                               OnClick="@ResetSettings">
+                        Reset to Defaults
+                    </BaseButton>
+                </MudStack>
+                
+                <MudStack Row="true" Spacing="2">
+                    <BaseButton Variant="Variant.Outlined" 
+                               Color="Color.Info" 
+                               OnClick="@ExportSettings">
+                        Export Settings
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Outlined" 
+                               Color="Color.Warning" 
+                               OnClick="@ImportSettings">
+                        Import Settings
+                    </BaseButton>
+                </MudStack>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+@code {
+    private bool _saving = false;
+    private SystemSettings _settings = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("Settings Page Viewed");
+        await LoadSettings();
+    }
+
+    private async Task LoadSettings()
+    {
+        // Load settings from service or local storage
+        // For now, using default values
+        _settings = new SystemSettings
+        {
+            CompanyName = "Control Painel CRM",
+            CompanyEmail = "contact@company.com",
+            DefaultTheme = "system",
+            DefaultLanguage = "en",
+            DateFormat = "MM/dd/yyyy",
+            Currency = "USD",
+            DefaultTaxRate = "10",
+            FiscalYearStart = "January",
+            InvoicePrefix = "INV-",
+            EstimatePrefix = "EST-",
+            EmailNotifications = true,
+            ProjectDeadlineAlerts = true,
+            InvoiceOverdueAlerts = true,
+            LeadFollowupReminders = true,
+            SystemMaintenanceAlerts = false,
+            SessionTimeout = "30",
+            PasswordMinLength = "8",
+            RequirePasswordComplexity = true,
+            EnableTwoFactorAuth = false,
+            LogUserActivity = true,
+            EnableDataBackup = true
+        };
+    }
+
+    private async Task SaveSettings()
+    {
+        _saving = true;
+        try
+        {
+            // Save settings to service or local storage
+            await Task.Delay(1000); // Simulate save operation
+            
+            Snackbar.Add("Settings saved successfully", Severity.Success);
+            await UIPersonalizationService.LogAccessAsync("Settings Saved");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving settings: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task ResetSettings()
+    {
+        await LoadSettings();
+        Snackbar.Add("Settings reset to defaults", Severity.Info);
+    }
+
+    private async Task ExportSettings()
+    {
+        Snackbar.Add("Settings export feature coming soon", Severity.Info);
+    }
+
+    private async Task ImportSettings()
+    {
+        Snackbar.Add("Settings import feature coming soon", Severity.Info);
+    }
+
+    public class SystemSettings
+    {
+        public string CompanyName { get; set; } = string.Empty;
+        public string CompanyEmail { get; set; } = string.Empty;
+        public string CompanyPhone { get; set; } = string.Empty;
+        public string CompanyWebsite { get; set; } = string.Empty;
+        public string CompanyAddress { get; set; } = string.Empty;
+        public string DefaultTheme { get; set; } = "system";
+        public string DefaultLanguage { get; set; } = "en";
+        public string DateFormat { get; set; } = "MM/dd/yyyy";
+        public string Currency { get; set; } = "USD";
+        public string DefaultTaxRate { get; set; } = "0";
+        public string FiscalYearStart { get; set; } = "January";
+        public string InvoicePrefix { get; set; } = "INV-";
+        public string EstimatePrefix { get; set; } = "EST-";
+        public bool EmailNotifications { get; set; } = true;
+        public bool ProjectDeadlineAlerts { get; set; } = true;
+        public bool InvoiceOverdueAlerts { get; set; } = true;
+        public bool LeadFollowupReminders { get; set; } = true;
+        public bool SystemMaintenanceAlerts { get; set; } = false;
+        public string SessionTimeout { get; set; } = "30";
+        public string PasswordMinLength { get; set; } = "8";
+        public bool RequirePasswordComplexity { get; set; } = true;
+        public bool EnableTwoFactorAuth { get; set; } = false;
+        public bool LogUserActivity { get; set; } = true;
+        public bool EnableDataBackup { get; set; } = true;
+        public string EmailProvider { get; set; } = string.Empty;
+        public string PaymentGateway { get; set; } = string.Empty;
+        public string CloudStorageProvider { get; set; } = string.Empty;
+        public string AnalyticsProvider { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,332 @@
+@page "/customers/{id:guid}"
+@inject ICustomerService CustomerService
+@inject IUIPersonalizationService UIPersonalizationService
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>@(_customer?.DisplayName ?? "Customer") - Control Painel CRM</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbItems" />
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+else if (_customer == null)
+{
+    <MudAlert Severity="Severity.Error" Class="my-4">
+        Customer not found.
+    </MudAlert>
+}
+else
+{
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <div>
+            <MudText Typo="Typo.h3" GutterBottom="true">@_customer.DisplayName</MudText>
+            <MudChip T="string" Color="@GetStatusColor(_customer.Status)" Size="Size.Medium">
+                @_customer.Status
+            </MudChip>
+        </div>
+        <MudStack Row="true" Spacing="2">
+            <BaseButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.Edit"
+                       OnClick="@EditCustomer">
+                Edit Customer
+            </BaseButton>
+            <BaseButton Variant="Variant.Outlined" 
+                       Color="Color.Error" 
+                       StartIcon="@Icons.Material.Filled.Delete"
+                       OnClick="@DeleteCustomer">
+                Delete
+            </BaseButton>
+        </MudStack>
+    </MudStack>
+
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudStack Spacing="4">
+                <!-- Contact Information -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Contact Information</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.ContactMail" Color="Color.Primary" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Email</MudText>
+                                <MudText Typo="Typo.body1">@_customer.Email</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Phone</MudText>
+                                <MudText Typo="Typo.body1">@(_customer.Phone ?? "Not provided")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Company</MudText>
+                                <MudText Typo="Typo.body1">@(_customer.Company ?? "Individual")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Job Title</MudText>
+                                <MudText Typo="Typo.body1">@(_customer.JobTitle ?? "Not specified")</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Address Information -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Address</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.LocationOn" Color="Color.Secondary" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        @if (!string.IsNullOrEmpty(_customer.Address.Street))
+                        {
+                            <MudText Typo="Typo.body1">@_customer.Address.FullAddress</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary">No address provided</MudText>
+                        }
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Notes -->
+                @if (!string.IsNullOrEmpty(_customer.Notes))
+                {
+                    <BaseCard>
+                        <HeaderContent>
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">Notes</MudText>
+                                </CardHeaderContent>
+                                <CardHeaderActions>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Notes" Color="Color.Info" />
+                                </CardHeaderActions>
+                            </MudCardHeader>
+                        </HeaderContent>
+                        <ChildContent>
+                            <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_customer.Notes</MudText>
+                        </ChildContent>
+                    </BaseCard>
+                }
+            </MudStack>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudStack Spacing="4">
+                <!-- Customer Statistics -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Statistics</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.Analytics" Color="Color.Success" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Total Revenue</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Success">@_customer.TotalRevenue.ToString("C")</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Projects</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Primary">@_customer.ProjectCount</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Customer Type</MudText>
+                                <MudText Typo="Typo.body1">@_customer.Type</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Last Contact</MudText>
+                                <MudText Typo="Typo.body1">@(_customer.LastContactDate?.ToString("MMM dd, yyyy") ?? "Never")</MudText>
+                            </div>
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Customer Details -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Details</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Info" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="2">
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Created</MudText>
+                                <MudText Typo="Typo.body2">@_customer.CreatedAt.ToString("MMM dd, yyyy HH:mm")</MudText>
+                            </div>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Last Updated</MudText>
+                                <MudText Typo="Typo.body2">@_customer.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</MudText>
+                            </div>
+                            @if (_customer.Tags.Any())
+                            {
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Class="mud-text-secondary">Tags</MudText>
+                                    <MudStack Row="true" Spacing="1" Class="mt-1">
+                                        @foreach (var tag in _customer.Tags)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Default">@tag</MudChip>
+                                        }
+                                    </MudStack>
+                                </div>
+                            }
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+
+                <!-- Quick Actions -->
+                <BaseCard>
+                    <HeaderContent>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Quick Actions</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                    </HeaderContent>
+                    <ChildContent>
+                        <MudStack Spacing="2">
+                            <MudButton Variant="Variant.Text" 
+                                      StartIcon="@Icons.Material.Filled.Email" 
+                                      FullWidth="true"
+                                      Href="@($"mailto:{_customer.Email}")">
+                                Send Email
+                            </MudButton>
+                            @if (!string.IsNullOrEmpty(_customer.Phone))
+                            {
+                                <MudButton Variant="Variant.Text" 
+                                          StartIcon="@Icons.Material.Filled.Phone" 
+                                          FullWidth="true"
+                                          Href="@($"tel:{_customer.Phone}")">
+                                    Call Customer
+                                </MudButton>
+                            }
+                            <MudButton Variant="Variant.Text" 
+                                      StartIcon="@Icons.Material.Filled.Add" 
+                                      FullWidth="true">
+                                New Project
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" 
+                                      StartIcon="@Icons.Material.Filled.RequestQuote" 
+                                      FullWidth="true">
+                                Create Estimate
+                            </MudButton>
+                        </MudStack>
+                    </ChildContent>
+                </BaseCard>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    
+    private Customer? _customer;
+    private bool _loading = true;
+    private List<BreadcrumbItem> _breadcrumbItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UIPersonalizationService.LogAccessAsync("View Customer Page Viewed", Id.ToString());
+        await LoadCustomer();
+        
+        _breadcrumbItems = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: "/", icon: Icons.Material.Filled.Home),
+            new BreadcrumbItem("Customers", href: "/customers", icon: Icons.Material.Filled.People),
+            new BreadcrumbItem(_customer?.DisplayName ?? "Customer", href: null, disabled: true, icon: Icons.Material.Filled.Person)
+        };
+    }
+
+    private async Task LoadCustomer()
+    {
+        _loading = true;
+        try
+        {
+            _customer = await CustomerService.GetCustomerByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading customer: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private Color GetStatusColor(CustomerStatus status)
+    {
+        return status switch
+        {
+            CustomerStatus.Active => Color.Success,
+            CustomerStatus.Inactive => Color.Default,
+            CustomerStatus.Prospect => Color.Info,
+            CustomerStatus.Lead => Color.Warning,
+            CustomerStatus.Archived => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private void EditCustomer()
+    {
+        Navigation.NavigateTo($"/customers/{Id}/edit");
+    }
+
+    private async Task DeleteCustomer()
+    {
+        if (_customer == null) return;
+
+        var parameters = new DialogParameters
+        {
+            ["ContentText"] = $"Are you sure you want to delete customer '{_customer.DisplayName}'? This action cannot be undone.",
+            ["ButtonText"] = "Delete",
+            ["Color"] = Color.Error
+        };
+
+        var dialog = await DialogService.ShowAsync<MudMessageBox>("Delete Customer", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            var success = await CustomerService.DeleteCustomerAsync(_customer.Id);
+            if (success)
+            {
+                Snackbar.Add($"Customer '{_customer.DisplayName}' deleted successfully", Severity.Success);
+                await UIPersonalizationService.LogAccessAsync("Customer Deleted", _customer.DisplayName);
+                Navigation.NavigateTo("/customers");
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete customer", Severity.Error);
+            }
+        }
+    }
+}
