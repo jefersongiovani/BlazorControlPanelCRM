@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining customer management operations and data access methods.
+/// Provides contract for customer CRUD operations, search functionality, and filtering capabilities.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for customer management, enabling dependency injection
+/// and testability while providing comprehensive customer data operations.
+/// </remarks>
 public interface ICustomerService
 {
     Task<List<Customer>> GetAllCustomersAsync();
@@ -15,6 +29,15 @@ public interface ICustomerService
     Task<List<Customer>> GetCustomersByTypeAsync(CustomerType type);
 }
 
+/// <summary>
+/// Customer service implementation providing customer management operations using local storage.
+/// Implements comprehensive customer CRUD operations, search functionality, and data persistence.
+/// </summary>
+/// <remarks>
+/// Uses browser local storage for data persistence in this demo implementation.
+/// Provides sample data initialization and maintains customer data across browser sessions.
+/// In a production environment, this would be replaced with database operations.
+/// </remarks>
 public class CustomerService : ICustomerService
 {
     private readonly ILocalStorageService _localStorage;

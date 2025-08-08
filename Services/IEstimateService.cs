@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining estimate management operations and quote generation functionality.
+/// Provides contract for estimate CRUD operations, approval workflow, and invoice conversion.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for comprehensive estimate management including
+/// quote generation, customer approval workflow, and conversion to invoices.
+/// </remarks>
 public interface IEstimateService
 {
     Task<List<Estimate>> GetAllEstimatesAsync();

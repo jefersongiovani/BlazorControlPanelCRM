@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining analytics and reporting operations for business intelligence.
+/// Provides contract for generating analytics data, charts, and comprehensive business reports.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for business analytics including dashboard metrics,
+/// performance tracking, chart data generation, and automated report creation.
+/// </remarks>
 public interface IAnalyticsService
 {
     Task<DashboardAnalytics> GetDashboardAnalyticsAsync();

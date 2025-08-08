@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining lead management operations and sales pipeline functionality.
+/// Provides contract for lead CRUD operations, conversion tracking, and sales process management.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for comprehensive lead management including
+/// lead qualification, assignment, conversion tracking, and sales pipeline analytics.
+/// </remarks>
 public interface ILeadService
 {
     Task<List<Lead>> GetAllLeadsAsync();

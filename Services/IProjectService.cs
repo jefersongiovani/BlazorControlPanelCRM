@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining project management operations and data access methods.
+/// Provides contract for project CRUD operations, task management, and project analytics.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for comprehensive project management including
+/// project lifecycle management, team assignment, progress tracking, and reporting capabilities.
+/// </remarks>
 public interface IProjectService
 {
     Task<List<Project>> GetAllProjectsAsync();

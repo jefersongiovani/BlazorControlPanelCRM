@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining invoice management operations and billing functionality.
+/// Provides contract for invoice CRUD operations, payment tracking, and accounts receivable management.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for comprehensive invoice management including
+/// billing workflows, payment processing, and financial reporting capabilities.
+/// </remarks>
 public interface IInvoiceService
 {
     Task<List<Invoice>> GetAllInvoicesAsync();

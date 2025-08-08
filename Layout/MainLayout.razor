@@ -1,4 +1,22 @@
-﻿@inherits LayoutComponentBase
+﻿@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+
+    Main Layout Component
+    Primary layout component that defines the overall structure and appearance of the application.
+    Provides the main navigation, theme management, and responsive layout framework.
+
+    Features:
+    - Responsive navigation drawer
+    - Theme switching (light/dark mode)
+    - Application header with branding
+    - MudBlazor provider setup
+    - Consistent layout structure
+    - Mobile-friendly responsive design
+*@
+
+@inherits LayoutComponentBase
 @inject IUIPersonalizationService UIPersonalizationService
 @inject IJSRuntime JSRuntime
 

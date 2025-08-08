@@ -1,8 +1,22 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using BlazorControlPanel.Models;
 using Blazored.LocalStorage;
 
 namespace BlazorControlPanel.Services;
 
+/// <summary>
+/// Interface defining staff management operations and data access methods.
+/// Provides contract for staff CRUD operations, search functionality, and organizational structure management.
+/// </summary>
+/// <remarks>
+/// Defines the service layer contract for staff management, enabling comprehensive
+/// employee data operations, department management, and role-based access control.
+/// </remarks>
 public interface IStaffService
 {
     Task<List<Staff>> GetAllStaffAsync();

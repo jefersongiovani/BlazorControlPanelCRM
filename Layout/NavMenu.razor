@@ -1,4 +1,22 @@
-﻿@inject IUIPersonalizationService UIPersonalizationService
+﻿@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+
+    Navigation Menu Component
+    Main navigation menu component providing hierarchical navigation structure for the application.
+    Organizes all application modules and features into logical groups with icons and labels.
+
+    Features:
+    - Hierarchical navigation structure
+    - Expandable/collapsible navigation groups
+    - Icon-based navigation items
+    - Active link highlighting
+    - Responsive design for mobile devices
+    - Organized by functional modules (Customers, Staff, Leads, Projects, etc.)
+*@
+
+@inject IUIPersonalizationService UIPersonalizationService
 
 <MudNavMenu>
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">

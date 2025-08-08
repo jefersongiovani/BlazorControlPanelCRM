@@ -1,8 +1,26 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+
+    Settings Page
+    System configuration page for managing application settings, user preferences, and UI customization.
+    Provides comprehensive settings management including themes, notifications, and system preferences.
+
+    Features:
+    - General application settings
+    - Theme and appearance customization
+    - Notification preferences
+    - User interface personalization
+    - System configuration options
+    - Settings import/export functionality
+*@
+
 @page "/settings"
 @inject IUIPersonalizationService UIPersonalizationService
 @inject ISnackbar Snackbar
 
-<PageTitle>Settings - Control Painel CRM</PageTitle>
+<PageTitle>Settings - Control Panel CRM</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">System Settings</MudText>
 
@@ -78,9 +96,10 @@
                     </BaseSelect>
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    <BaseSelect @bind-Value="_settings.Currency" 
-                               Label="Default Currency" 
-                               T="string">
+                    <BaseSelect @bind-Value="_settings.Currency"
+                                Label="Default Currency"
+                                T="string">
+                        <MudSelectItem T="string" Value="@("GBP")">GBP (£)</MudSelectItem>
                         <MudSelectItem T="string" Value="@("USD")">USD ($)</MudSelectItem>
                         <MudSelectItem T="string" Value="@("BRL")">BRL (R$)</MudSelectItem>
                         <MudSelectItem T="string" Value="@("EUR")">EUR (€)</MudSelectItem>

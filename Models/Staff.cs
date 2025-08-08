@@ -1,5 +1,21 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 namespace BlazorControlPanel.Models;
 
+/// <summary>
+/// Staff entity representing employees and team members in the organization.
+/// Contains comprehensive staff information including personal details, employment data,
+/// and role assignments for effective human resource management.
+/// </summary>
+/// <remarks>
+/// Central entity for staff management, used for employee tracking, role assignment,
+/// project allocation, and performance monitoring. Supports various employment types
+/// and comprehensive employee lifecycle management.
+/// </remarks>
 public class Staff
 {
     public Guid Id { get; set; } = Guid.NewGuid();

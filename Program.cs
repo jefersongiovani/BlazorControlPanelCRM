@@ -1,3 +1,9 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BlazorControlPanel;
@@ -5,6 +11,19 @@ using BlazorControlPanel.Services;
 using MudBlazor.Services;
 using Blazored.LocalStorage;
 
+/// <summary>
+/// Application entry point and dependency injection configuration for the Blazor Control Panel.
+/// Configures services, components, and application startup settings for the WebAssembly host.
+/// </summary>
+/// <remarks>
+/// This file sets up the entire application including:
+/// - Root component registration
+/// - HTTP client configuration
+/// - MudBlazor UI framework setup
+/// - Local storage services
+/// - Business service registrations
+/// - Application startup and hosting
+/// </remarks>
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 // Configure root components

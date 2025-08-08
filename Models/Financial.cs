@@ -1,5 +1,20 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 namespace BlazorControlPanel.Models;
 
+/// <summary>
+/// Estimate entity representing project quotes and cost estimates provided to customers.
+/// Contains detailed line items, pricing, and status tracking for the sales process.
+/// </summary>
+/// <remarks>
+/// Essential for the sales process, allowing creation of detailed project estimates
+/// that can be converted to invoices upon customer acceptance. Supports comprehensive
+/// pricing structures with line items, taxes, and terms.
+/// </remarks>
 public class Estimate
 {
     public Guid Id { get; set; } = Guid.NewGuid();

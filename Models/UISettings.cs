@@ -1,5 +1,19 @@
+/*
+ * Project: Blazor Control Panel
+ * Date: 2025-08-08
+ * Author: J Schneider - j.g@live.com
+ */
+
 namespace BlazorControlPanel.Models;
 
+/// <summary>
+/// UI settings entity representing user interface preferences and customization options.
+/// Contains theme settings, layout preferences, and personalization data for individual users.
+/// </summary>
+/// <remarks>
+/// Used for storing and managing user-specific UI preferences, enabling personalized
+/// user experiences and maintaining consistent settings across sessions.
+/// </remarks>
 public class UISettings
 {
     public string Theme { get; set; } = "light";
