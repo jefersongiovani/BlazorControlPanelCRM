@@ -1,0 +1,41 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Progress Linear Component
+    Reusable linear progress component wrapper around MudBlazor's MudProgressLinear.
+    Provides consistent progress bar indication across the application.
+    
+    Features:
+    - Configurable progress values
+    - Color and size options
+    - Indeterminate mode support
+    - Consistent progress styling
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudProgressLinear Color="@Color"
+                   Size="@Size"
+                   Indeterminate="@Indeterminate"
+                   Value="@Value"
+                   Striped="@Striped"
+                   Vertical="@Vertical"
+                   Rounded="@Rounded"
+                   Class="@Class"
+                   Style="@Style" />
+
+@code {
+    [Parameter] public Color Color { get; set; } = Color.Primary;
+    [Parameter] public Size Size { get; set; } = Size.Medium;
+    [Parameter] public bool Indeterminate { get; set; }
+    [Parameter] public double Value { get; set; }
+    [Parameter] public bool Striped { get; set; }
+    [Parameter] public bool Vertical { get; set; }
+    [Parameter] public bool Rounded { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

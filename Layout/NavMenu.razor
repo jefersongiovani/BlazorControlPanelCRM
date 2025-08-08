@@ -18,87 +18,87 @@
 
 @inject IUIPersonalizationService UIPersonalizationService
 
-<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+<BaseNavMenu>
+    <BaseNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
         Dashboard
-    </MudNavLink>
+    </BaseNavLink>
 
-    <MudNavGroup  Title="Customers" Icon="@Icons.Material.Filled.People" Expanded="true">
-        <MudNavLink Href="/customers" Icon="@Icons.Material.Filled.List">
+    <BaseNavGroup Title="Customers" Icon="@Icons.Material.Filled.People" Expanded="true">
+        <BaseNavLink Href="/customers" Icon="@Icons.Material.Filled.List">
             Customer List
-        </MudNavLink>
-        <MudNavLink Href="/customers/create" Icon="@Icons.Material.Filled.PersonAdd">
+        </BaseNavLink>
+        <BaseNavLink Href="/customers/create" Icon="@Icons.Material.Filled.PersonAdd">
             Add Customer
-        </MudNavLink>
-    </MudNavGroup>
+        </BaseNavLink>
+    </BaseNavGroup>
 
-    <MudNavGroup Title="Staff" Icon="@Icons.Material.Filled.Badge" Expanded="false">
-        <MudNavLink Href="/staff" Icon="@Icons.Material.Filled.List">
+    <BaseNavGroup Title="Staff" Icon="@Icons.Material.Filled.Badge" Expanded="false">
+        <BaseNavLink Href="/staff" Icon="@Icons.Material.Filled.List">
             Staff List
-        </MudNavLink>
-        <MudNavLink Href="/staff/create" Icon="@Icons.Material.Filled.PersonAdd">
+        </BaseNavLink>
+        <BaseNavLink Href="/staff/create" Icon="@Icons.Material.Filled.PersonAdd">
             Add Staff
-        </MudNavLink>
+        </BaseNavLink>
 
-    </MudNavGroup>
+    </BaseNavGroup>
 
-    <MudNavGroup Title="Sales" Icon="@Icons.Material.Filled.AttachMoney" Expanded="false">
-        <MudNavLink Href="/estimates" Icon="@Icons.Material.Filled.RequestQuote">
+    <BaseNavGroup Title="Sales" Icon="@Icons.Material.Filled.AttachMoney" Expanded="false">
+        <BaseNavLink Href="/estimates" Icon="@Icons.Material.Filled.RequestQuote">
             Estimates
-        </MudNavLink>
-        <MudNavLink Href="/invoices" Icon="@Icons.Material.Filled.Receipt">
+        </BaseNavLink>
+        <BaseNavLink Href="/invoices" Icon="@Icons.Material.Filled.Receipt">
             Invoices
-        </MudNavLink>
-        <MudNavLink Href="/leads" Icon="@Icons.Material.Filled.TrendingUp">
+        </BaseNavLink>
+        <BaseNavLink Href="/leads" Icon="@Icons.Material.Filled.TrendingUp">
             Leads
-        </MudNavLink>
-    </MudNavGroup>
+        </BaseNavLink>
+    </BaseNavGroup>
 
-    <MudNavGroup Title="Projects" Icon="@Icons.Material.Filled.Work" Expanded="false">
-        <MudNavLink Href="/projects" Icon="@Icons.Material.Filled.List">
+    <BaseNavGroup Title="Projects" Icon="@Icons.Material.Filled.Work" Expanded="false">
+        <BaseNavLink Href="/projects" Icon="@Icons.Material.Filled.List">
             Project List
-        </MudNavLink>
-        <MudNavLink Href="/projects/create" Icon="@Icons.Material.Filled.Add">
+        </BaseNavLink>
+        <BaseNavLink Href="/projects/create" Icon="@Icons.Material.Filled.Add">
             New Project
-        </MudNavLink>
-        <MudNavLink Href="/project-templates" Icon="@Icons.Material.Filled.ContentCopy">
+        </BaseNavLink>
+        <BaseNavLink Href="/project-templates" Icon="@Icons.Material.Filled.ContentCopy">
             Templates
-        </MudNavLink>
-    </MudNavGroup>
+        </BaseNavLink>
+    </BaseNavGroup>
 
-    <MudNavGroup Title="Finance" Icon="@Icons.Material.Filled.AccountBalance" Expanded="false">
-        <MudNavLink Href="/expenses" Icon="@Icons.Material.Filled.MoneyOff">
+    <BaseNavGroup Title="Finance" Icon="@Icons.Material.Filled.AccountBalance" Expanded="false">
+        <BaseNavLink Href="/expenses" Icon="@Icons.Material.Filled.MoneyOff">
             Expenses
-        </MudNavLink>
-        <MudNavLink Href="/contracts" Icon="@Icons.Material.Filled.Description">
+        </BaseNavLink>
+        <BaseNavLink Href="/contracts" Icon="@Icons.Material.Filled.Description">
             Contracts
-        </MudNavLink>
-    </MudNavGroup>
+        </BaseNavLink>
+    </BaseNavGroup>
 
-    <MudNavGroup Title="Analytics" Icon="@Icons.Material.Filled.Analytics" Expanded="false">
-        <MudNavLink Href="/analytics" Icon="@Icons.Material.Filled.Dashboard">
+    <BaseNavGroup Title="Analytics" Icon="@Icons.Material.Filled.Analytics" Expanded="false">
+        <BaseNavLink Href="/analytics" Icon="@Icons.Material.Filled.Dashboard">
             Dashboard
-        </MudNavLink>
-        <MudNavLink Href="/analytics/reports" Icon="@Icons.Material.Filled.Assessment">
+        </BaseNavLink>
+        <BaseNavLink Href="/analytics/reports" Icon="@Icons.Material.Filled.Assessment">
             Reports
-        </MudNavLink>
-        <MudNavLink Href="/analytics/templates" Icon="@Icons.Material.Filled.Description">
+        </BaseNavLink>
+        <BaseNavLink Href="/analytics/templates" Icon="@Icons.Material.Filled.Description">
             Report Templates
-        </MudNavLink>
-        <MudNavLink Href="/analytics/trends" Icon="@Icons.Material.Filled.TrendingUp">
+        </BaseNavLink>
+        <BaseNavLink Href="/analytics/trends" Icon="@Icons.Material.Filled.TrendingUp">
             Trends
-        </MudNavLink>
-        <MudNavLink Href="/analytics/comparison" Icon="@Icons.Material.Filled.Compare">
+        </BaseNavLink>
+        <BaseNavLink Href="/analytics/comparison" Icon="@Icons.Material.Filled.Compare">
             Comparison
-        </MudNavLink>
-    </MudNavGroup>
+        </BaseNavLink>
+    </BaseNavGroup>
 
-    <MudDivider Class="my-2" />
+    <BaseDivider Class="my-2" />
 
-    <MudNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">
+    <BaseNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">
         Settings
-    </MudNavLink>
-</MudNavMenu>
+    </BaseNavLink>
+</BaseNavMenu>
 
 @code {
     protected override async Task OnInitializedAsync()

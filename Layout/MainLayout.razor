@@ -20,20 +20,18 @@
 @inject IUIPersonalizationService UIPersonalizationService
 @inject IJSRuntime JSRuntime
 
-<MudThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<BaseThemeProvider @ref="@_mudThemeProvider" @bind-IsDarkMode="@_isDarkMode" />
+<BaseProviders />
 
-<MudLayout>
+<BaseLayout>
     <BaseAppBar Elevation="1" Color="Color.Primary">
         <BaseIconButton Icon="@Icons.Material.Filled.Menu"
                        Color="Color.Inherit"
                        Edge="Edge.Start"
                        OnClick="@ToggleDrawer" />
-        <MudSpacer />
-        <MudText Typo="Typo.h6" Class="ml-3">Control Painel CRM</MudText>
-        <MudSpacer />
+        <BaseSpacer />
+        <BaseText Typo="Typo.h6" Class="ml-3">Control Painel CRM</BaseText>
+        <BaseSpacer />
         <BaseIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
                        Color="Color.Inherit"
                        OnClick="@ToggleTheme" />
@@ -45,17 +43,17 @@
         <NavMenu />
     </BaseDrawer>
 
-    <MudMainContent Class="pt-16 px-16">
-        <MudContainer MaxWidth="MaxWidth.False" Class="my-16 pt-16">
+    <BaseMainContent Class="pt-16 px-16">
+        <BaseContainer MaxWidth="MaxWidth.False" Class="my-16 pt-16">
             @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+        </BaseContainer>
+    </BaseMainContent>
+</BaseLayout>
 
 @code {
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
-    private MudThemeProvider? _mudThemeProvider;
+    private BaseThemeProvider? _mudThemeProvider;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,10 +66,10 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && _mudThemeProvider != null)
+        if (firstRender && _mudThemeProvider?.ThemeProviderRef != null)
         {
-            _isDarkMode = await _mudThemeProvider.GetSystemPreference();
-            StateHasChanged();
+            _isDarkMode = await _mudThemeProvider.ThemeProviderRef.GetSystemDarkModeAsync();
+            await InvokeAsync(StateHasChanged);
         }
     }
 

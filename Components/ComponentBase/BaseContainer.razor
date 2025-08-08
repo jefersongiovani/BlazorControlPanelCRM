@@ -1,0 +1,34 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Container Component
+    Reusable container component wrapper around MudBlazor's MudContainer.
+    Provides consistent container styling and responsive behavior across the application.
+    
+    Features:
+    - Responsive container behavior
+    - Configurable max width
+    - Consistent container styling
+    - Flexible content layout
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudContainer MaxWidth="@MaxWidth"
+              Fixed="@Fixed"
+              Class="@Class"
+              Style="@Style">
+    @ChildContent
+</MudContainer>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public MaxWidth MaxWidth { get; set; } = MaxWidth.Large;
+    [Parameter] public bool Fixed { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

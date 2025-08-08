@@ -1,0 +1,29 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Main Content Component
+    Reusable main content component wrapper around MudBlazor's MudMainContent.
+    Provides consistent main content area styling and behavior across the application.
+    
+    Features:
+    - Consistent main content styling
+    - Proper layout structure
+    - Responsive design support
+    - Flexible content area
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudMainContent Class="@Class" Style="@Style">
+    @ChildContent
+</MudMainContent>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

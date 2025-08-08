@@ -1,0 +1,48 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Paper Component
+    Reusable paper component wrapper around MudBlazor's MudPaper with standardized surface styling.
+    Provides consistent surface appearance and elevation across the application.
+    
+    Features:
+    - Configurable elevation and styling
+    - Surface color options
+    - Consistent spacing and appearance
+    - Responsive design support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudPaper Elevation="@Elevation"
+          Square="@Square"
+          Outlined="@Outlined"
+          Class="@Class"
+          Style="@Style"
+          Width="@Width"
+          Height="@Height"
+          MaxWidth="@MaxWidth"
+          MaxHeight="@MaxHeight"
+          MinWidth="@MinWidth"
+          MinHeight="@MinHeight">
+    @ChildContent
+</MudPaper>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public int Elevation { get; set; } = 1;
+    [Parameter] public bool Square { get; set; }
+    [Parameter] public bool Outlined { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Width { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public string? MaxWidth { get; set; }
+    [Parameter] public string? MaxHeight { get; set; }
+    [Parameter] public string? MinWidth { get; set; }
+    [Parameter] public string? MinHeight { get; set; }
+}

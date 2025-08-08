@@ -1,0 +1,40 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Text Component
+    Reusable text component wrapper around MudBlazor's MudText with standardized typography and styling.
+    Provides consistent text appearance and functionality across the application.
+    
+    Features:
+    - Configurable typography variants
+    - Consistent text styling
+    - Color and alignment options
+    - Responsive design support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudText Typo="@Typo"
+         Color="@Color"
+         Align="@Align"
+         GutterBottom="@GutterBottom"
+         Inline="@Inline"
+         Class="@Class"
+         Style="@Style">
+    @ChildContent
+</MudText>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public Typo Typo { get; set; } = Typo.body1;
+    [Parameter] public Color Color { get; set; } = Color.Default;
+    [Parameter] public Align Align { get; set; } = Align.Left;
+    [Parameter] public bool GutterBottom { get; set; }
+    [Parameter] public bool Inline { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

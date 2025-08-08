@@ -1,0 +1,35 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Divider Component
+    Reusable divider component wrapper around MudBlazor's MudDivider.
+    Provides consistent divider styling and behavior across the application.
+    
+    Features:
+    - Configurable divider styling
+    - Vertical and horizontal options
+    - Consistent divider appearance
+    - Flexible spacing
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudDivider DividerType="@DividerType"
+            FlexItem="@FlexItem"
+            Light="@Light"
+            Absolute="@Absolute"
+            Class="@Class"
+            Style="@Style" />
+
+@code {
+    [Parameter] public DividerType DividerType { get; set; } = DividerType.FullWidth;
+    [Parameter] public bool FlexItem { get; set; }
+    [Parameter] public bool Light { get; set; }
+    [Parameter] public bool Absolute { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

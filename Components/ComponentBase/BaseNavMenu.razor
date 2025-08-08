@@ -1,0 +1,40 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Navigation Menu Component
+    Reusable navigation menu component wrapper around MudBlazor's MudNavMenu.
+    Provides consistent navigation structure and behavior across the application.
+    
+    Features:
+    - Hierarchical navigation support
+    - Consistent navigation styling
+    - Expandable/collapsible groups
+    - Active link highlighting
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudNavMenu Color="@Color"
+            Bordered="@Bordered"
+            Dense="@Dense"
+            Rounded="@Rounded"
+            Margin="@Margin"
+            Class="@Class"
+            Style="@Style">
+    @ChildContent
+</MudNavMenu>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public Color Color { get; set; } = Color.Default;
+    [Parameter] public bool Bordered { get; set; }
+    [Parameter] public bool Dense { get; set; }
+    [Parameter] public bool Rounded { get; set; }
+    [Parameter] public Margin Margin { get; set; } = Margin.None;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

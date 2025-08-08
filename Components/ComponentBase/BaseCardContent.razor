@@ -1,0 +1,29 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Card Content Component
+    Reusable card content component wrapper around MudBlazor's MudCardContent.
+    Provides consistent card content styling and behavior across the application.
+    
+    Features:
+    - Consistent content styling
+    - Flexible content layout
+    - Proper spacing and padding
+    - Responsive design support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudCardContent Class="@Class" Style="@Style">
+    @ChildContent
+</MudCardContent>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

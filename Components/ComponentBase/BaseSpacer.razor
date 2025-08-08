@@ -1,0 +1,26 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Spacer Component
+    Reusable spacer component wrapper around MudBlazor's MudSpacer.
+    Provides consistent spacing and layout flexibility across the application.
+    
+    Features:
+    - Flexible spacing
+    - Layout alignment
+    - Consistent spacing behavior
+    - Responsive design support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudSpacer Class="@Class" Style="@Style" />
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

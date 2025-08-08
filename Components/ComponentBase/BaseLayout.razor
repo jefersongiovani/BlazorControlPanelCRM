@@ -1,0 +1,29 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Layout Component
+    Reusable layout component wrapper around MudBlazor's MudLayout.
+    Provides consistent layout structure and behavior across the application.
+    
+    Features:
+    - Responsive layout structure
+    - Consistent layout behavior
+    - Flexible content areas
+    - Mobile-friendly design
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudLayout Class="@Class" Style="@Style">
+    @ChildContent
+</MudLayout>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

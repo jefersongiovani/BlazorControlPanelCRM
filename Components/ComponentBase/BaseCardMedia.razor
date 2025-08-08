@@ -1,0 +1,33 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Card Media Component
+    Reusable card media component wrapper around MudBlazor's MudCardMedia.
+    Provides consistent card media styling and behavior across the application.
+    
+    Features:
+    - Image and media support
+    - Consistent media styling
+    - Responsive media display
+    - Height and sizing options
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudCardMedia Image="@Image"
+              Title="@Title"
+              Height="@Height"
+              Class="@Class"
+              Style="@Style" />
+
+@code {
+    [Parameter] public string? Image { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public int Height { get; set; } = 200;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

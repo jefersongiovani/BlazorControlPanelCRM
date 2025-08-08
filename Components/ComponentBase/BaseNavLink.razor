@@ -1,0 +1,44 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Navigation Link Component
+    Reusable navigation link component wrapper around MudBlazor's MudNavLink.
+    Provides consistent navigation link behavior and styling across the application.
+    
+    Features:
+    - Active link highlighting
+    - Icon support
+    - Consistent link styling
+    - Navigation matching options
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudNavLink Href="@Href"
+            Match="@Match"
+            Target="@Target"
+            Icon="@Icon"
+            IconColor="@IconColor"
+            Disabled="@Disabled"
+            ForceLoad="@ForceLoad"
+            Class="@Class"
+            Style="@Style">
+    @ChildContent
+</MudNavLink>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
+    [Parameter] public string? Target { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public Color IconColor { get; set; } = Color.Inherit;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ForceLoad { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

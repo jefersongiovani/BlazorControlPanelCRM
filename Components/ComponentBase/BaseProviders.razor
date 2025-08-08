@@ -1,0 +1,28 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Providers Component
+    Reusable providers component wrapper around MudBlazor's provider components.
+    Provides consistent provider setup and configuration across the application.
+    
+    Features:
+    - Popover provider setup
+    - Dialog provider setup
+    - Snackbar provider setup
+    - Consistent provider configuration
+    - Centralized provider management
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@code {
+    // This component provides all the necessary MudBlazor providers
+    // in a single, reusable component
+}

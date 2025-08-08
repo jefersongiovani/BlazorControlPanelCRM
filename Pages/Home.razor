@@ -20,167 +20,165 @@
 
 <PageTitle>Dashboard - Control Painel CRM</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
-<MudText Class="mb-8">Welcome to your CRM Control Panel</MudText>
+<BaseText Typo="Typo.h3" GutterBottom="true">Dashboard</BaseText>
+<BaseText Class="mb-8">Welcome to your CRM Control Panel</BaseText>
 
-<MudGrid>
-    <MudItem xs="12" sm="6" md="3">
+<BaseGrid>
+    <BaseItem Xs="12" Sm="6" Md="3">
         <BaseCard>
             <HeaderContent>
-                <MudCardHeader>
+                <BaseCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Customers</MudText>
+                        <BaseText Typo="Typo.h6">Customers</BaseText>
                     </CardHeaderContent>
                     <CardHeaderActions>
-                        <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" />
+                        <BaseIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" />
                     </CardHeaderActions>
-                </MudCardHeader>
+                </BaseCardHeader>
             </HeaderContent>
             <ChildContent>
-                <MudText Typo="Typo.h4" Align="Align.Center">@_customerCount</MudText>
-                <MudText Typo="Typo.body2" Align="Align.Center">Total Customers</MudText>
+                <BaseText Typo="Typo.h4" Align="Align.Center">@_customerCount</BaseText>
+                <BaseText Typo="Typo.body2" Align="Align.Center">Total Customers</BaseText>
             </ChildContent>
             <ActionsContent>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true" Href="/customers">
+                <BaseButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true" Href="/customers">
                     View All
-                </MudButton>
+                </BaseButton>
             </ActionsContent>
         </BaseCard>
-    </MudItem>
+    </BaseItem>
 
-    <MudItem xs="12" sm="6" md="3">
+    <BaseItem Xs="12" Sm="6" Md="3">
         <BaseCard>
             <HeaderContent>
-                <MudCardHeader>
+                <BaseCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Projects</MudText>
+                        <BaseText Typo="Typo.h6">Projects</BaseText>
                     </CardHeaderContent>
                     <CardHeaderActions>
-                        <MudIconButton Icon="@Icons.Material.Filled.Work" Color="Color.Secondary" />
+                        <BaseIconButton Icon="@Icons.Material.Filled.Work" Color="Color.Secondary" />
                     </CardHeaderActions>
-                </MudCardHeader>
+                </BaseCardHeader>
             </HeaderContent>
             <ChildContent>
-                <MudText Typo="Typo.h4" Align="Align.Center">@_projectCount</MudText>
-                <MudText Typo="Typo.body2" Align="Align.Center">Active Projects</MudText>
+                <BaseText Typo="Typo.h4" Align="Align.Center">@_projectCount</BaseText>
+                <BaseText Typo="Typo.body2" Align="Align.Center">Active Projects</BaseText>
             </ChildContent>
             <ActionsContent>
-                <MudButton Variant="Variant.Text" Color="Color.Secondary" FullWidth="true" Href="/projects">
+                <BaseButton Variant="Variant.Text" Color="Color.Secondary" FullWidth="true" Href="/projects">
                     View All
-                </MudButton>
+                </BaseButton>
             </ActionsContent>
         </BaseCard>
-    </MudItem>
+    </BaseItem>
 
-    <MudItem xs="12" sm="6" md="3">
+    <BaseItem Xs="12" Sm="6" Md="3">
         <BaseCard>
             <HeaderContent>
-                <MudCardHeader>
+                <BaseCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Leads</MudText>
+                        <BaseText Typo="Typo.h6">Leads</BaseText>
                     </CardHeaderContent>
                     <CardHeaderActions>
-                        <MudIconButton Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Success" />
+                        <BaseIconButton Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Success" />
                     </CardHeaderActions>
-                </MudCardHeader>
+                </BaseCardHeader>
             </HeaderContent>
             <ChildContent>
-                <MudText Typo="Typo.h4" Align="Align.Center">@_leadCount</MudText>
-                <MudText Typo="Typo.body2" Align="Align.Center">Open Leads</MudText>
+                <BaseText Typo="Typo.h4" Align="Align.Center">@_leadCount</BaseText>
+                <BaseText Typo="Typo.body2" Align="Align.Center">Open Leads</BaseText>
             </ChildContent>
             <ActionsContent>
-                <MudButton Variant="Variant.Text" Color="Color.Success" FullWidth="true" Href="/leads">
+                <BaseButton Variant="Variant.Text" Color="Color.Success" FullWidth="true" Href="/leads">
                     View All
-                </MudButton>
+                </BaseButton>
             </ActionsContent>
         </BaseCard>
-    </MudItem>
+    </BaseItem>
 
-    <MudItem xs="12" sm="6" md="3">
+    <BaseItem Xs="12" Sm="6" Md="3">
         <BaseCard>
             <HeaderContent>
-                <MudCardHeader>
+                <BaseCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Revenue</MudText>
+                        <BaseText Typo="Typo.h6">Revenue</BaseText>
                     </CardHeaderContent>
                     <CardHeaderActions>
-                        <MudIconButton Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Warning" />
+                        <BaseIconButton Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Warning" />
                     </CardHeaderActions>
-                </MudCardHeader>
+                </BaseCardHeader>
             </HeaderContent>
             <ChildContent>
-                <MudText Typo="Typo.h4" Align="Align.Center">@_revenue.ToString("C")</MudText>
-                <MudText Typo="Typo.body2" Align="Align.Center">This Month</MudText>
+                <BaseText Typo="Typo.h4" Align="Align.Center">@_revenue.ToString("C")</BaseText>
+                <BaseText Typo="Typo.body2" Align="Align.Center">This Month</BaseText>
             </ChildContent>
             <ActionsContent>
-                <MudButton Variant="Variant.Text" Color="Color.Warning" FullWidth="true" Href="/invoices">
+                <BaseButton Variant="Variant.Text" Color="Color.Warning" FullWidth="true" Href="/invoices">
                     View Details
-                </MudButton>
+                </BaseButton>
             </ActionsContent>
         </BaseCard>
-    </MudItem>
-</MudGrid>
+    </BaseItem>
+</BaseGrid>
 
-<MudGrid Class="mt-8">
-    <MudItem xs="12" md="8">
+<BaseGrid Class="mt-8">
+    <BaseItem Xs="12" Md="8">
         <BaseCard>
             <HeaderContent>
-                <MudCardHeader>
+                <BaseCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Recent Activity</MudText>
+                        <BaseText Typo="Typo.h6">Recent Activity</BaseText>
                     </CardHeaderContent>
-                </MudCardHeader>
+                </BaseCardHeader>
             </HeaderContent>
             <ChildContent>
-                <MudList T="string">
+                <BaseList T="string">
                     @foreach (var activity in _recentActivities)
                     {
-                        <MudListItem T="string" Icon="@activity.Icon" Text="@activity.Description">
-                            <NestedList>
-                                <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                                    @activity.Timestamp.ToString("MMM dd, yyyy HH:mm")
-                                </MudText>
-                            </NestedList>
-                        </MudListItem>
-                        <MudDivider />
+                        <BaseListItem T="string" Icon="@activity.Icon" Text="@activity.Description">
+                            <BaseText Typo="Typo.body2" Class="mud-text-secondary">
+                                @activity.Timestamp.ToString("MMM dd, yyyy HH:mm")
+                            </BaseText>
+                        </BaseListItem>
+                        <BaseDivider />
                     }
-                </MudList>
+                </BaseList>
             </ChildContent>
         </BaseCard>
-    </MudItem>
+    </BaseItem>
 
-    <MudItem xs="12" md="4">
+    <BaseItem Xs="12" Md="4">
         <BaseCard>
             <HeaderContent>
-                <MudCardHeader>
+                <BaseCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Quick Actions</MudText>
+                        <BaseText Typo="Typo.h6">Quick Actions</BaseText>
                     </CardHeaderContent>
-                </MudCardHeader>
+                </BaseCardHeader>
             </HeaderContent>
             <ChildContent>
-                <MudStack>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                <BaseStack>
+                    <BaseButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
                               StartIcon="@Icons.Material.Filled.PersonAdd" Href="/customers/create">
                         Add Customer
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true"
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true"
                               StartIcon="@Icons.Material.Filled.Add" Href="/projects/create">
                         New Project
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true"
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true"
                               StartIcon="@Icons.Material.Filled.RequestQuote" Href="/estimates/create">
                         Create Estimate
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Warning" FullWidth="true"
+                    </BaseButton>
+                    <BaseButton Variant="Variant.Filled" Color="Color.Warning" FullWidth="true"
                               StartIcon="@Icons.Material.Filled.Receipt" Href="/invoices/create">
                         New Invoice
-                    </MudButton>
-                </MudStack>
+                    </BaseButton>
+                </BaseStack>
             </ChildContent>
         </BaseCard>
-    </MudItem>
-</MudGrid>
+    </BaseItem>
+</BaseGrid>
 
 @code {
     private int _customerCount = 0;

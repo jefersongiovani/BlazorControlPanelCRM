@@ -1,0 +1,33 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Theme Provider Component
+    Reusable theme provider component wrapper around MudBlazor's MudThemeProvider.
+    Provides consistent theme management and styling across the application.
+    
+    Features:
+    - Theme management
+    - Dark/light mode support
+    - Consistent theming
+    - Custom theme support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudThemeProvider @ref="@ThemeProviderRef"
+                  Theme="@Theme"
+                  @bind-IsDarkMode="@IsDarkMode"
+                  DefaultScrollbar="@DefaultScrollbar" />
+
+@code {
+    [Parameter] public MudTheme? Theme { get; set; }
+    [Parameter] public bool IsDarkMode { get; set; }
+    [Parameter] public EventCallback<bool> IsDarkModeChanged { get; set; }
+    [Parameter] public bool DefaultScrollbar { get; set; }
+    
+    public MudThemeProvider? ThemeProviderRef { get; set; }
+}

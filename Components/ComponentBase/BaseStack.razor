@@ -1,0 +1,42 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Stack Component
+    Reusable stack component wrapper around MudBlazor's MudStack with standardized layout and spacing.
+    Provides consistent layout behavior and spacing across the application.
+    
+    Features:
+    - Configurable direction (row/column)
+    - Consistent spacing options
+    - Alignment and justification
+    - Responsive design support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudStack Row="@Row"
+          Reverse="@Reverse"
+          Spacing="@Spacing"
+          Justify="@Justify"
+          AlignItems="@AlignItems"
+          Wrap="@Wrap"
+          Class="@Class"
+          Style="@Style">
+    @ChildContent
+</MudStack>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool Row { get; set; }
+    [Parameter] public bool Reverse { get; set; }
+    [Parameter] public int Spacing { get; set; } = 3;
+    [Parameter] public Justify Justify { get; set; } = Justify.FlexStart;
+    [Parameter] public AlignItems AlignItems { get; set; } = AlignItems.Stretch;
+    [Parameter] public Wrap Wrap { get; set; } = Wrap.NoWrap;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

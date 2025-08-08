@@ -1,0 +1,52 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+
+    Base List Item Component
+    Reusable list item component wrapper around MudBlazor's MudListItem.
+    Provides consistent list item styling and behavior across the application.
+
+    Features:
+    - Configurable list item styling
+    - Icon and text support
+    - Nested list support
+    - Click handling
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+@typeparam T
+
+<MudListItem T="T"
+             Text="@Text"
+             Value="@Value"
+             Icon="@Icon"
+             IconColor="@IconColor"
+             IconSize="@IconSize"
+             Disabled="@Disabled"
+             Href="@Href"
+             Target="@Target"
+             ForceLoad="@ForceLoad"
+             OnClick="@OnClick"
+             Class="@Class"
+             Style="@Style">
+    @ChildContent
+</MudListItem>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public Color IconColor { get; set; } = Color.Inherit;
+    [Parameter] public Size IconSize { get; set; } = Size.Medium;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+    [Parameter] public bool ForceLoad { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

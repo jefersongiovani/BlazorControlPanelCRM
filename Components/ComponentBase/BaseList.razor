@@ -1,0 +1,40 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base List Component
+    Reusable list component wrapper around MudBlazor's MudList.
+    Provides consistent list styling and behavior across the application.
+    
+    Features:
+    - Configurable list styling
+    - Dense and clickable options
+    - Consistent list behavior
+    - Responsive design support
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+@typeparam T
+
+<MudList T="T"
+         Clickable="@Clickable"
+         Dense="@Dense"
+         DisableGutters="@DisableGutters"
+         DisablePadding="@DisablePadding"
+         Class="@Class"
+         Style="@Style">
+    @ChildContent
+</MudList>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool Clickable { get; set; }
+    [Parameter] public bool Dense { get; set; }
+    [Parameter] public bool DisableGutters { get; set; }
+    [Parameter] public bool DisablePadding { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}

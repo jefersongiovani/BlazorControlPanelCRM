@@ -1,0 +1,36 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-08
+    Author: J Schneider - j.g@live.com
+    
+    Base Grid Component
+    Reusable grid component wrapper around MudBlazor's MudGrid with standardized responsive layout.
+    Provides consistent grid behavior and responsive design across the application.
+    
+    Features:
+    - Responsive grid system
+    - Configurable spacing
+    - Alignment options
+    - Consistent layout behavior
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<MudGrid Spacing="@Spacing"
+         Justify="@Justify"
+         AlignItems="@AlignItems"
+         Class="@Class"
+         Style="@Style">
+    @ChildContent
+</MudGrid>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public int Spacing { get; set; } = 3;
+    [Parameter] public Justify Justify { get; set; } = Justify.FlexStart;
+    [Parameter] public AlignItems AlignItems { get; set; } = AlignItems.Stretch;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+}
