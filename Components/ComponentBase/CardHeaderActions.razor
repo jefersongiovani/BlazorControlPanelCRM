@@ -1,0 +1,26 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-11
+    Author: J Schneider - j.g@live.com
+
+    Card Header Actions Component
+    Wrapper component for MudBlazor's CardHeaderActions.
+    Provides the actions area within a card header.
+
+    Features:
+    - Card header actions area
+    - Consistent actions styling
+    - Button and action layout
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<CardHeaderActions>
+    @ChildContent
+</CardHeaderActions>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

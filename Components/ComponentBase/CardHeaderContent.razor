@@ -1,0 +1,26 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-11
+    Author: J Schneider - j.g@live.com
+
+    Card Header Content Component
+    Wrapper component for MudBlazor's CardHeaderContent.
+    Provides the content area within a card header.
+
+    Features:
+    - Card header content area
+    - Consistent content styling
+    - Flexible content layout
+    - Customizable through parameters
+*@
+
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+<CardHeaderContent>
+    @ChildContent
+</CardHeaderContent>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
