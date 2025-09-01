@@ -337,7 +337,7 @@ public class RoleService : IRoleService
 
     public async Task<List<Permission>> GetAllPermissionsAsync()
     {
-        return SystemPermissions.AllPermissions;
+        return  await Task.FromResult(SystemPermissions.AllPermissions);
     }
 
     public async Task InitializeDefaultRolesAsync()

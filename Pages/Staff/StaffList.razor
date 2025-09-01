@@ -39,7 +39,7 @@
                        Clearable="true"
                        T="string"
                        Class="min-width-150">
-                <MudSelectItem T="string" Value="@((string)null)">All Departments</MudSelectItem>
+                <MudSelectItem T="string" Value="@((string)null!)">All Departments</MudSelectItem>
                 @foreach (var department in _departments)
                 {
                     <MudSelectItem T="string" Value="@department">@department</MudSelectItem>
@@ -191,10 +191,11 @@
         StateHasChanged();
     }
 
-    private async Task OnSearch(string searchTerm)
+    private Task OnSearch(string searchTerm)
     {
         _searchString = searchTerm;
         FilterStaff();
+        return Task.CompletedTask;
     }
 
     private Color GetStatusColor(StaffStatus status)

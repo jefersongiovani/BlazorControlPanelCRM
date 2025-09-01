@@ -44,48 +44,103 @@
     </BaseDrawer>
 
     <BaseMainContent Class="pt-16 px-16">
-        <BaseContainer MaxWidth="MaxWidth.False" Class="my-16 pt-16">
-            @Body
-        </BaseContainer>
+        @if (!_isInitialized)
+        {
+            <BaseContainer MaxWidth="MaxWidth.False" Class="my-16 pt-16">
+                <BaseCard>
+                    <ChildContent>
+                        <BaseStack Class="pa-8">
+                            <BaseProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+                            <BaseText Typo="Typo.h6" Align="Align.Center">Loading Application...</BaseText>
+                        </BaseStack>
+                    </ChildContent>
+                </BaseCard>
+            </BaseContainer>
+        }
+        else
+        {
+            <BaseContainer MaxWidth="MaxWidth.False" Class="my-16 pt-16">
+                @Body
+            </BaseContainer>
+        }
     </BaseMainContent>
+
+    <BasePerformanceMonitor />
 </BaseLayout>
 
 @code {
     private bool _drawerOpen = true;
     private bool _isDarkMode = false;
     private BaseThemeProvider? _mudThemeProvider;
+    private bool _isInitialized = false;
 
     protected override async Task OnInitializedAsync()
     {
-        var settings = await UIPersonalizationService.GetUISettingsAsync();
-        _isDarkMode = settings.DarkMode;
-        _drawerOpen = settings.ShowSidebar;
-
-        await UIPersonalizationService.LogAccessAsync("Layout Initialized");
+        try
+        {
+            var settings = await UIPersonalizationService.GetUISettingsAsync();
+            _isDarkMode = settings.DarkMode;
+            _drawerOpen = settings.ShowSidebar;
+            _isInitialized = true;
+        }
+        catch
+        {
+            // Fallback to default values if service fails
+            _isDarkMode = false;
+            _drawerOpen = true;
+            _isInitialized = true;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && _mudThemeProvider?.ThemeProviderRef != null)
         {
-            _isDarkMode = await _mudThemeProvider.ThemeProviderRef.GetSystemDarkModeAsync();
-            await InvokeAsync(StateHasChanged);
+            try
+            {
+                _isDarkMode = await _mudThemeProvider.ThemeProviderRef.GetSystemDarkModeAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+            catch
+            {
+                // Fallback if theme detection fails
+            }
         }
     }
 
     private async Task ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
-        var settings = await UIPersonalizationService.GetUISettingsAsync();
-        settings.ShowSidebar = _drawerOpen;
-        await UIPersonalizationService.SaveUISettingsAsync(settings);
+        if (_isInitialized)
+        {
+            try
+            {
+                var settings = await UIPersonalizationService.GetUISettingsAsync();
+                settings.ShowSidebar = _drawerOpen;
+                await UIPersonalizationService.SaveUISettingsAsync(settings);
+            }
+            catch
+            {
+                // Continue with UI update even if save fails
+            }
+        }
     }
 
     private async Task ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
-        var settings = await UIPersonalizationService.GetUISettingsAsync();
-        settings.DarkMode = _isDarkMode;
-        await UIPersonalizationService.SaveUISettingsAsync(settings);
+        if (_isInitialized)
+        {
+            try
+            {
+                var settings = await UIPersonalizationService.GetUISettingsAsync();
+                settings.DarkMode = _isDarkMode;
+                await UIPersonalizationService.SaveUISettingsAsync(settings);
+            }
+            catch
+            {
+                // Continue with UI update even if save fails
+            }
+        }
     }
 }

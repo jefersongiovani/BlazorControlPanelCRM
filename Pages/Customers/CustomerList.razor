@@ -174,10 +174,11 @@
         StateHasChanged();
     }
 
-    private async Task OnSearch(string searchTerm)
+    private Task OnSearch(string searchTerm)
     {
         _searchString = searchTerm;
         FilterCustomers();
+        return Task.CompletedTask;
     }
 
     private void OnStatusFilterChanged()

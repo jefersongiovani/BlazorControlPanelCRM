@@ -10,6 +10,9 @@
            FullWidth="@FullWidth"
            OnClick="@OnClick"
            Class="@Class"
+           Href="@Href"
+           HtmlTag="@HtmlTag"
+           Target="@Target"
            Style="@Style">
     @ChildContent
 </MudButton>
@@ -26,4 +29,7 @@
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public string? Class { get; set; }
     [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? HtmlTag { get; set; }
+    [Parameter] public string? Target { get; set; }
 }
