@@ -1,11 +1,11 @@
 @page "/estimates"
 @inject IEstimateService EstimateService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>Estimates - Control Painel CRM</PageTitle>
+<PageTitle>Estimates - Control Panel CRM</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Estimates</MudText>
 
@@ -241,7 +241,7 @@
             await EstimateService.SendEstimateAsync(estimate.Id);
             Snackbar.Add($"Estimate {estimate.DisplayNumber} sent successfully", Severity.Success);
             await LoadEstimates();
-            await UIPersonalizationService.LogAccessAsync("Estimate Sent", estimate.DisplayNumber);
+            await UIPersonalizationService.LogAccessAsync($"Estimate Sent {estimate.DisplayNumber}");
         }
         catch (Exception ex)
         {
@@ -268,7 +268,7 @@
                 await EstimateService.ConvertToInvoiceAsync(estimate.Id);
                 Snackbar.Add($"Estimate {estimate.DisplayNumber} converted to invoice successfully", Severity.Success);
                 await LoadEstimates();
-                await UIPersonalizationService.LogAccessAsync("Estimate Converted", estimate.DisplayNumber);
+                await UIPersonalizationService.LogAccessAsync($"Estimate Converted {estimate.DisplayNumber}");
                 Navigation.NavigateTo("/invoices");
             }
             catch (Exception ex)
@@ -297,7 +297,7 @@
             {
                 Snackbar.Add($"Estimate '{estimate.DisplayNumber}' deleted successfully", Severity.Success);
                 await LoadEstimates();
-                await UIPersonalizationService.LogAccessAsync("Estimate Deleted", estimate.DisplayNumber);
+                await UIPersonalizationService.LogAccessAsync($"Estimate Deleted {estimate.DisplayNumber}");
             }
             else
             {

@@ -1,6 +1,7 @@
 @page "/analytics/templates"
+@using MudGrid = MudBlazor.MudGrid
 @inject IAnalyticsService AnalyticsService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject ISnackbar Snackbar
 
 <PageTitle>Report Templates - Control Panel CRM</PageTitle>
@@ -216,7 +217,7 @@
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudPaper Class="pa-4" Style="background-color: var(--mud-palette-background-grey);">
+                    <MudPaper Class="pa-4" Style="background-color: var('--mud-palette-background-grey');">
                         <MudStack Spacing="2">
                             <MudText Typo="Typo.h4" Align="Align.Center">@_reportTitle</MudText>
                             <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mud-text-secondary">
@@ -370,7 +371,7 @@
     private async Task PreviewTemplate()
     {
         _showPreview = true;
-        await UIPersonalizationService.LogAccessAsync("Template Previewed", _selectedTemplate);
+        await UIPersonalizationService.LogAccessAsync($"Template Previewed {_selectedTemplate}");
     }
 
     private async Task GenerateReport()
@@ -393,7 +394,7 @@
             if (report.Status == ReportStatus.Generated)
             {
                 Snackbar.Add($"Report '{_reportTitle}' generated successfully", Severity.Success);
-                await UIPersonalizationService.LogAccessAsync("Template Report Generated", $"{_selectedTemplate} - {_outputFormat}");
+                await UIPersonalizationService.LogAccessAsync($"Template Report Generated - {_selectedTemplate} - {_outputFormat}");
             }
             else
             {

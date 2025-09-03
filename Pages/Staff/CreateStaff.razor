@@ -1,8 +1,8 @@
 @page "/staff/create"
 @inject NavigationManager Navigation
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 
-<PageTitle>Create Staff Member - Control Painel CRM</PageTitle>
+<PageTitle>Create Staff Member - Control Panel CRM</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbItems" />
 
@@ -33,7 +33,7 @@
 
     private async Task OnStaffSaved(Staff staff)
     {
-        await UIPersonalizationService.LogAccessAsync("Staff Created", staff.FullName);
+        await UIPersonalizationService.LogAccessAsync($"Staff Created {staff.FullName}");
         Navigation.NavigateTo("/staff");
     }
 

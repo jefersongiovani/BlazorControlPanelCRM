@@ -1,7 +1,8 @@
 @page "/leads/{id:guid}"
+@using MudGrid = MudBlazor.MudGrid
 @inject ILeadService LeadService
 @inject ILeadActivityService LeadActivityService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -354,7 +355,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await UIPersonalizationService.LogAccessAsync("View Lead Page Viewed", Id.ToString());
+        await UIPersonalizationService.LogAccessAsync($"View Lead Page Viewed {Id.ToString()}");
         await LoadLead();
         await LoadActivities();
         
@@ -475,7 +476,7 @@ else
 
                 await LeadService.ConvertLeadToCustomerAsync(_lead.Id, customer);
                 Snackbar.Add($"Lead '{_lead.DisplayName}' converted to customer successfully", Severity.Success);
-                await UIPersonalizationService.LogAccessAsync("Lead Converted", _lead.DisplayName);
+                await UIPersonalizationService.LogAccessAsync($"Lead Converted {_lead.DisplayName}");
                 Navigation.NavigateTo("/customers");
             }
             catch (Exception ex)
@@ -505,7 +506,7 @@ else
             if (success)
             {
                 Snackbar.Add($"Lead '{_lead.DisplayName}' deleted successfully", Severity.Success);
-                await UIPersonalizationService.LogAccessAsync("Lead Deleted", _lead.DisplayName);
+                await UIPersonalizationService.LogAccessAsync($"Lead Deleted {_lead.DisplayName}");
                 Navigation.NavigateTo("/leads");
             }
             else

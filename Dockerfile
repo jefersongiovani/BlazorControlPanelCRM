@@ -4,6 +4,17 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 # Set working directory
 WORKDIR /src
 
+# Install Python and other build dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    build-essential \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install WASM tools workload
+RUN dotnet workload install wasm-tools
+
 # Copy project file and restore dependencies
 COPY BlazorControlPanel.csproj .
 RUN dotnet restore "BlazorControlPanel.csproj"

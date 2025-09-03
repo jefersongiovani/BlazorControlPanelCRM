@@ -1,6 +1,6 @@
 @page "/analytics/trends"
 @inject IAnalyticsService AnalyticsService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject ISnackbar Snackbar
 
 <PageTitle>Trend Analysis - Control Painel CRM</PageTitle>
@@ -287,7 +287,7 @@
             // Simulate data loading
             await Task.Delay(1000);
 
-            await UIPersonalizationService.LogAccessAsync("Trend Analysis Updated", $"{_selectedMetric} - {_timeGranularity}");
+            await UIPersonalizationService.LogAccessAsync($"Trend Analysis Updated {_selectedMetric} - {_timeGranularity}");
         }
         finally
         {
@@ -309,6 +309,6 @@
 
         var report = await AnalyticsService.GenerateReportAsync(request);
         Snackbar.Add($"Trend analysis exported: {report.FileName}", Severity.Success);
-        await UIPersonalizationService.LogAccessAsync("Trend Data Exported", _selectedMetric);
+        await UIPersonalizationService.LogAccessAsync($"Trend Data Exported {_selectedMetric}");
     }
 }

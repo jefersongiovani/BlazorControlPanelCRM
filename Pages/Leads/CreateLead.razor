@@ -1,8 +1,8 @@
 @page "/leads/create"
 @inject NavigationManager Navigation
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 
-<PageTitle>Create Lead - Control Painel CRM</PageTitle>
+<PageTitle>Create Lead - Control Panel CRM</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbItems" />
 
@@ -33,7 +33,7 @@
 
     private async Task OnLeadSaved(Lead lead)
     {
-        await UIPersonalizationService.LogAccessAsync("Lead Created", lead.DisplayName);
+        await UIPersonalizationService.LogAccessAsync($"Lead Created {lead.DisplayName}");
         Navigation.NavigateTo("/leads");
     }
 

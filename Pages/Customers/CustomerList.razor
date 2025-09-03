@@ -19,12 +19,12 @@
 
 @page "/customers"
 @inject ICustomerService CustomerService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>Customers - Control Painel CRM</PageTitle>
+<PageTitle>Customers - Control Panel CRM</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Customers</MudText>
 
@@ -233,7 +233,7 @@
             {
                 Snackbar.Add($"Customer '{customer.DisplayName}' deleted successfully", Severity.Success);
                 await LoadCustomers();
-                await UIPersonalizationService.LogAccessAsync("Customer Deleted", customer.DisplayName);
+                await UIPersonalizationService.LogAccessAsync($"Customer Deleted { customer.DisplayName}");
             }
             else
             {

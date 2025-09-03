@@ -1,9 +1,10 @@
 @page "/analytics/reports"
+@using MudGrid = MudBlazor.MudGrid
 @inject IAnalyticsService AnalyticsService
 @inject ICustomerService CustomerService
 @inject IStaffService StaffService
 @inject IProjectService ProjectService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject ISnackbar Snackbar
 
 <PageTitle>Reports - Control Panel CRM</PageTitle>
@@ -368,7 +369,7 @@
                     {
                         Snackbar.Add($"Report '{report.Title}' generated successfully", Severity.Success);
                         await LoadReportHistory();
-                        await UIPersonalizationService.LogAccessAsync("Report Generated", report.Title);
+                        await UIPersonalizationService.LogAccessAsync($"Report Generated {report.Title}");
                     }
                     else
                     {
@@ -408,7 +409,7 @@
             {
                 Snackbar.Add($"Quick report '{report.Title}' generated successfully", Severity.Success);
                 await LoadReportHistory();
-                await UIPersonalizationService.LogAccessAsync("Quick Report Generated", report.Title);
+                await UIPersonalizationService.LogAccessAsync($"Quick Report Generated {report.Title}");
             }
             else
             {
@@ -434,7 +435,7 @@
             // In a real application, this would trigger a file download
             // For now, we'll just show a success message
             Snackbar.Add($"Report '{report.FileName}' downloaded successfully", Severity.Success);
-            await UIPersonalizationService.LogAccessAsync("Report Downloaded", report.FileName);
+            await UIPersonalizationService.LogAccessAsync($"Report Downloaded {report.FileName}");
         }
         catch (Exception ex)
         {
@@ -447,7 +448,7 @@
         // In a real application, this would delete the report from storage
         _reportHistory.Remove(report);
         Snackbar.Add($"Report '{report.FileName}' deleted successfully", Severity.Success);
-        await UIPersonalizationService.LogAccessAsync("Report Deleted", report.FileName);
+        await UIPersonalizationService.LogAccessAsync($"Report Deleted {report.FileName}");
     }
 
     private string GetReportTypeName(ReportType type)

@@ -1,0 +1,78 @@
+@*
+    Project: Blazor Control Panel
+    Date: 2025-08-11
+    Author: J Schneider - j.g@live.com
+    
+    Base Performance Monitor Component
+    Performance monitoring component to track component rendering performance.
+    Helps identify performance bottlenecks and optimize component rendering.
+    
+    Features:
+    - Component render time tracking
+    - Performance logging
+    - Development mode only
+    - Non-blocking performance monitoring
+*@
+
+@using System.Diagnostics
+@inherits ComponentBase
+@namespace BlazorControlPanel.Components.ComponentBase
+
+@if (_showPerformanceInfo)
+{
+    <div class="performance-monitor">
+        <small class="performance-text">
+            Render: @_renderTime ms | Renders: @_renderCount
+        </small>
+    </div>
+}
+
+@code {
+    private bool _showPerformanceInfo = false;
+    private long _renderTime = 0;
+    private int _renderCount = 0;
+    private Stopwatch _stopwatch = new();
+
+    protected override void OnInitialized()
+    {
+        _stopwatch.Start();
+        
+        // Only show in development mode
+        #if DEBUG
+        _showPerformanceInfo = true;
+        #endif
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        _stopwatch.Stop();
+        _renderTime = _stopwatch.ElapsedMilliseconds;
+        _renderCount++;
+        
+        if (_showPerformanceInfo && _renderTime > 100) // Log slow renders
+        {
+            Console.WriteLine($"Performance Warning: {GetType().Name} took {_renderTime}ms to render");
+        }
+        
+        _stopwatch.Restart();
+    }
+}
+
+<style>
+    .performance-monitor {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        z-index: 9999;
+        pointer-events: none;
+    }
+    
+    .performance-text {
+        color: white;
+    }
+</style>

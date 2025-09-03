@@ -1,10 +1,10 @@
 @page "/customers/{id:guid}/edit"
 @inject ICustomerService CustomerService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
-<PageTitle>Edit Customer - Control Painel CRM</PageTitle>
+<PageTitle>Edit Customer - Control Panel CRM</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbItems" />
 
@@ -40,7 +40,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await UIPersonalizationService.LogAccessAsync("Edit Customer Page Viewed", Id.ToString());
+        await UIPersonalizationService.LogAccessAsync($"Edit Customer Page Viewed { Id.ToString()}");
         await LoadCustomer();
         
         _breadcrumbItems = new List<BreadcrumbItem>
@@ -71,7 +71,7 @@ else
 
     private async Task OnCustomerSaved(Customer customer)
     {
-        await UIPersonalizationService.LogAccessAsync("Customer Updated", customer.DisplayName);
+        await UIPersonalizationService.LogAccessAsync($"Customer Updated {customer.DisplayName}");
         Navigation.NavigateTo($"/customers/{customer.Id}");
     }
 

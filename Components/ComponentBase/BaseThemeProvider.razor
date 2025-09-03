@@ -14,7 +14,6 @@
     - Custom theme support
     - Customizable through parameters
 *@
-
 @inherits ComponentBase
 @namespace BlazorControlPanel.Components.ComponentBase
 
@@ -30,4 +29,10 @@
     [Parameter] public bool DefaultScrollbar { get; set; }
     
     public MudThemeProvider? ThemeProviderRef { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Theme ??= new MudTheme();
+        base.OnInitialized();
+    }
 }

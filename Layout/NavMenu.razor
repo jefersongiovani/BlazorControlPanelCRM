@@ -16,14 +16,14 @@
     - Organized by functional modules (Customers, Staff, Leads, Projects, etc.)
 *@
 
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 
 <BaseNavMenu>
     <BaseNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
         Dashboard
     </BaseNavLink>
 
-    <BaseNavGroup Title="Customers" Icon="@Icons.Material.Filled.People" Expanded="true">
+    <BaseNavGroup Title="Customers" Icon="@Icons.Material.Filled.People">
         <BaseNavLink Href="/customers" Icon="@Icons.Material.Filled.List">
             Customer List
         </BaseNavLink>
@@ -32,69 +32,38 @@
         </BaseNavLink>
     </BaseNavGroup>
 
-    <BaseNavGroup Title="Staff" Icon="@Icons.Material.Filled.Badge" Expanded="false">
-        <BaseNavLink Href="/staff" Icon="@Icons.Material.Filled.List">
-            Staff List
-        </BaseNavLink>
-        <BaseNavLink Href="/staff/create" Icon="@Icons.Material.Filled.PersonAdd">
-            Add Staff
-        </BaseNavLink>
-
-    </BaseNavGroup>
-
-    <BaseNavGroup Title="Sales" Icon="@Icons.Material.Filled.AttachMoney" Expanded="false">
-        <BaseNavLink Href="/estimates" Icon="@Icons.Material.Filled.RequestQuote">
-            Estimates
-        </BaseNavLink>
-        <BaseNavLink Href="/invoices" Icon="@Icons.Material.Filled.Receipt">
-            Invoices
-        </BaseNavLink>
-        <BaseNavLink Href="/leads" Icon="@Icons.Material.Filled.TrendingUp">
-            Leads
-        </BaseNavLink>
-    </BaseNavGroup>
-
-    <BaseNavGroup Title="Projects" Icon="@Icons.Material.Filled.Work" Expanded="false">
+    <BaseNavGroup Title="Projects" Icon="@Icons.Material.Filled.Work">
         <BaseNavLink Href="/projects" Icon="@Icons.Material.Filled.List">
             Project List
         </BaseNavLink>
         <BaseNavLink Href="/projects/create" Icon="@Icons.Material.Filled.Add">
             New Project
         </BaseNavLink>
-        <BaseNavLink Href="/project-templates" Icon="@Icons.Material.Filled.ContentCopy">
-            Templates
+    </BaseNavGroup>
+
+    <BaseNavGroup Title="Leads" Icon="@Icons.Material.Filled.TrendingUp">
+        <BaseNavLink Href="/leads" Icon="@Icons.Material.Filled.List">
+            Lead List
+        </BaseNavLink>
+        <BaseNavLink Href="/leads/create" Icon="@Icons.Material.Filled.Add">
+            New Lead
         </BaseNavLink>
     </BaseNavGroup>
 
-    <BaseNavGroup Title="Finance" Icon="@Icons.Material.Filled.AccountBalance" Expanded="false">
+    <BaseNavGroup Title="Financial" Icon="@Icons.Material.Filled.AttachMoney">
+        <BaseNavLink Href="/invoices" Icon="@Icons.Material.Filled.Receipt">
+            Invoices
+        </BaseNavLink>
         <BaseNavLink Href="/expenses" Icon="@Icons.Material.Filled.MoneyOff">
             Expenses
         </BaseNavLink>
-        <BaseNavLink Href="/contracts" Icon="@Icons.Material.Filled.Description">
-            Contracts
-        </BaseNavLink>
-    </BaseNavGroup>
-
-    <BaseNavGroup Title="Analytics" Icon="@Icons.Material.Filled.Analytics" Expanded="false">
-        <BaseNavLink Href="/analytics" Icon="@Icons.Material.Filled.Dashboard">
-            Dashboard
-        </BaseNavLink>
-        <BaseNavLink Href="/analytics/reports" Icon="@Icons.Material.Filled.Assessment">
-            Reports
-        </BaseNavLink>
-        <BaseNavLink Href="/analytics/templates" Icon="@Icons.Material.Filled.Description">
-            Report Templates
-        </BaseNavLink>
-        <BaseNavLink Href="/analytics/trends" Icon="@Icons.Material.Filled.TrendingUp">
-            Trends
-        </BaseNavLink>
-        <BaseNavLink Href="/analytics/comparison" Icon="@Icons.Material.Filled.Compare">
-            Comparison
+        <BaseNavLink Href="/analytics" Icon="@Icons.Material.Filled.Analytics">
+            Analytics
         </BaseNavLink>
     </BaseNavGroup>
 
     <BaseDivider Class="my-2" />
-
+    
     <BaseNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">
         Settings
     </BaseNavLink>
@@ -103,6 +72,6 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await UIPersonalizationService.LogAccessAsync("Navigation Menu Loaded");
+        await UIPersonalizationService.LogAccessAsync("NavMenu Loaded");
     }
 }

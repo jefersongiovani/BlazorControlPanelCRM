@@ -17,7 +17,8 @@
 *@
 
 @page "/settings"
-@inject IUIPersonalizationService UIPersonalizationService
+@using MudGrid = MudBlazor.MudGrid
+@inject IUiPersonalizationService UIPersonalizationService
 @inject ISnackbar Snackbar
 
 <PageTitle>Settings - Control Panel CRM</PageTitle>
@@ -298,7 +299,7 @@
         // For now, using default values
         _settings = new SystemSettings
         {
-            CompanyName = "Control Painel CRM",
+            CompanyName = "Control Panel CRM",
             CompanyEmail = "contact@company.com",
             DefaultTheme = "system",
             DefaultLanguage = "en",

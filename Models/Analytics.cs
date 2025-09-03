@@ -16,7 +16,7 @@ namespace BlazorControlPanel.Models;
 /// including customer metrics, lead performance, project status, financial health,
 /// staff productivity, and overall performance indicators.
 /// </remarks>
-public sealed class DashboardAnalytics
+public class DashboardAnalytics
 {
     /// <summary>
     /// Customer-related analytics including growth rates, segmentation, and trends

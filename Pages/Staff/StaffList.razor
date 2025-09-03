@@ -1,11 +1,11 @@
 @page "/staff"
 @inject IStaffService StaffService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>Staff - Control Painel CRM</PageTitle>
+<PageTitle>Staff - Control Panel CRM</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Staff Management</MudText>
 
@@ -245,7 +245,7 @@
             {
                 Snackbar.Add($"Staff member '{staff.FullName}' deleted successfully", Severity.Success);
                 await LoadStaff();
-                await UIPersonalizationService.LogAccessAsync("Staff Deleted", staff.FullName);
+                await UIPersonalizationService.LogAccessAsync($"Staff Deleted {staff.FullName}");
             }
             else
             {

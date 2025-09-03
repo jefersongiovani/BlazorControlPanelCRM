@@ -1,8 +1,8 @@
 @page "/customers/create"
 @inject NavigationManager Navigation
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 
-<PageTitle>Create Customer - Control Painel CRM</PageTitle>
+<PageTitle>Create Customer - Control Panel CRM</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbItems" />
 
@@ -33,7 +33,7 @@
 
     private async Task OnCustomerSaved(Customer customer)
     {
-        await UIPersonalizationService.LogAccessAsync("Customer Created", customer.DisplayName);
+        await UIPersonalizationService.LogAccessAsync($"Customer Created {customer.DisplayName}");
         Navigation.NavigateTo("/customers");
     }
 

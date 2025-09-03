@@ -1,9 +1,10 @@
 @page "/analytics/comparison"
+@using MudGrid = MudBlazor.MudGrid
 @inject IAnalyticsService AnalyticsService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject ISnackbar Snackbar
 
-<PageTitle>Performance Comparison - Control Painel CRM</PageTitle>
+<PageTitle>Performance Comparison - Control Panel CRM</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Performance Comparison</MudText>
 
@@ -303,7 +304,7 @@
             _performanceInsights = GeneratePerformanceInsights();
             _overallScore = CalculateOverallScore();
             
-            await UIPersonalizationService.LogAccessAsync("Performance Comparison Run", _comparisonType);
+            await UIPersonalizationService.LogAccessAsync("Performance Comparison Run");
         }
         finally
         {
@@ -551,7 +552,7 @@
 
         var report = await AnalyticsService.GenerateReportAsync(request);
         Snackbar.Add($"Comparison analysis exported: {report.FileName}", Severity.Success);
-        await UIPersonalizationService.LogAccessAsync("Comparison Exported", _comparisonType);
+        await UIPersonalizationService.LogAccessAsync("Comparison Exported");
     }
 
     // Supporting class

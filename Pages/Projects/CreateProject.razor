@@ -1,8 +1,8 @@
 @page "/projects/create"
 @inject NavigationManager Navigation
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 
-<PageTitle>Create Project - Control Painel CRM</PageTitle>
+<PageTitle>Create Project - Control Panel CRM</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbItems" />
 
@@ -33,7 +33,7 @@
 
     private async Task OnProjectSaved(Project project)
     {
-        await UIPersonalizationService.LogAccessAsync("Project Created", project.Name);
+        await UIPersonalizationService.LogAccessAsync($"Project Created {project.Name}");
         Navigation.NavigateTo("/projects");
     }
 

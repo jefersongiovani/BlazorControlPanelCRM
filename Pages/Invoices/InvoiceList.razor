@@ -1,11 +1,12 @@
 @page "/invoices"
+@using MudGrid = MudBlazor.MudGrid
 @inject IInvoiceService InvoiceService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>Invoices - Control Painel CRM</PageTitle>
+<PageTitle>Invoices - Control Panel CRM</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Invoices</MudText>
 
@@ -321,7 +322,7 @@
             Snackbar.Add($"Invoice {invoice.DisplayNumber} sent successfully", Severity.Success);
             await LoadInvoices();
             await LoadSummaryData();
-            await UIPersonalizationService.LogAccessAsync("Invoice Sent", invoice.DisplayNumber);
+            await UIPersonalizationService.LogAccessAsync($"Invoice Sent {invoice.DisplayNumber}");
         }
         catch (Exception ex)
         {
@@ -337,7 +338,7 @@
             Snackbar.Add($"Invoice {invoice.DisplayNumber} marked as paid", Severity.Success);
             await LoadInvoices();
             await LoadSummaryData();
-            await UIPersonalizationService.LogAccessAsync("Invoice Paid", invoice.DisplayNumber);
+            await UIPersonalizationService.LogAccessAsync($"Invoice Paid {invoice.DisplayNumber}");
         }
         catch (Exception ex)
         {
@@ -365,7 +366,7 @@
                 Snackbar.Add($"Invoice '{invoice.DisplayNumber}' deleted successfully", Severity.Success);
                 await LoadInvoices();
                 await LoadSummaryData();
-                await UIPersonalizationService.LogAccessAsync("Invoice Deleted", invoice.DisplayNumber);
+                await UIPersonalizationService.LogAccessAsync($"Invoice Deleted {invoice.DisplayNumber}");
             }
             else
             {

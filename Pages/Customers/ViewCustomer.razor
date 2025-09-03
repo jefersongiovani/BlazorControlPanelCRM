@@ -1,11 +1,11 @@
 @page "/customers/{id:guid}"
 @inject ICustomerService CustomerService
-@inject IUIPersonalizationService UIPersonalizationService
+@inject IUiPersonalizationService UIPersonalizationService
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<PageTitle>@(_customer?.DisplayName ?? "Customer") - Control Painel CRM</PageTitle>
+<PageTitle>@(_customer?.DisplayName ?? "Customer") - Control Panel CRM</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbItems" />
 
@@ -254,7 +254,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await UIPersonalizationService.LogAccessAsync("View Customer Page Viewed", Id.ToString());
+        await UIPersonalizationService.LogAccessAsync($"View Customer Page Viewed {Id.ToString()}");
         await LoadCustomer();
         
         _breadcrumbItems = new List<BreadcrumbItem>
@@ -320,7 +320,7 @@ else
             if (success)
             {
                 Snackbar.Add($"Customer '{_customer.DisplayName}' deleted successfully", Severity.Success);
-                await UIPersonalizationService.LogAccessAsync("Customer Deleted", _customer.DisplayName);
+                await UIPersonalizationService.LogAccessAsync($"Customer Deleted {_customer.DisplayName}");
                 Navigation.NavigateTo("/customers");
             }
             else
